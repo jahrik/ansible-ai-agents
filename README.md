@@ -12,9 +12,9 @@ that all agents read.
 ## Requirements
 
 - Ansible 2.16+
-- `git` on target host
-- `npm` on target host (for agent CLI installs)
-- `gh` CLI on target host (for Copilot extension)
+- `git` on target host (to clone the agent-config repo)
+- `gh` CLI on target host (only if `copilot` is enabled)
+- `brew` on macOS (only if `cursor` is enabled)
 
 ## Role Variables
 

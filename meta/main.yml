@@ -17,6 +17,9 @@ galaxy_info:
       versions:
         - noble
         - jammy
+    - name: Fedora
+      versions:
+        - all
     - name: macOS
       versions:
         - all

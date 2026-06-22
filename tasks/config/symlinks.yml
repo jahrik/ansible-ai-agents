@@ -27,7 +27,7 @@
     force: true
     follow: false
 
-- name: Symlink CLAUDE.md for Claude Code compatibility
+- name: Symlink AGENTS.md into ~/.claude for Claude Code
   ansible.builtin.file:
     src: "{{ ai_agents_config_dest }}/AGENTS.md"
     dest: "{{ ansible_env.HOME }}/.claude/AGENTS.md"
