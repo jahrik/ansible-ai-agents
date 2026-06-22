@@ -6,6 +6,16 @@ This is an Ansible role. AI agents working in this repo should follow these conv
 
 Installs and configures AI coding agents across OS environments. See `README.md` for usage.
 
+## Key Variables
+
+| Variable                | Default                                  | Description                                  |
+| ----------------------- | ---------------------------------------- | -------------------------------------------- |
+| `ai_agents_config_repo` | `https://github.com/jahrik/agent-config` | Git URL of the agent config repo to clone    |
+| `ai_agents_config_ref`  | `main`                                   | Branch or tag to check out                   |
+| `ai_agents_config_dest` | `~/.config/agents`                       | Clone destination for the config repo        |
+| `ai_agents_install`     | dict (`agy`/`claude_code` on)            | Per-agent install toggles                    |
+| `ai_agents_symlinks`    | list                                     | `src`→`dest` links from config repo to tools |
+
 ## Key Files
 
 - `defaults/main.yml` — all tuneable variables with defaults
