@@ -17,6 +17,3 @@ ai_agents_symlinks:
     dest: "{{ ansible_env.HOME }}/.agents/AGENTS.md"
   - src: "{{ ai_agents_config_dest }}/skills"
     dest: "{{ ansible_env.HOME }}/.agents/skills"
-
-# Package manager overrides per OS family (set automatically but can override)
-ai_agents_pkg_mgr: "{{ 'pacman' if ansible_os_family == 'Archlinux' else 'apt' if ansible_os_family == 'Debian' else 'brew' if ansible_os_family == 'Darwin' else 'auto' }}"

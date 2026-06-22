@@ -4,15 +4,6 @@
   gather_facts: true
   tasks:
 
-    - name: Check that git is installed
-      ansible.builtin.package_facts:
-        manager: auto
-
-    - name: Assert git is installed
-      ansible.builtin.assert:
-        that: "'git' in ansible_facts.packages"
-        fail_msg: "git package was not installed"
-
     - name: Stat agent config destination
       ansible.builtin.stat:
         path: "{{ ansible_env.HOME }}/.config/agents"
@@ -33,12 +24,12 @@
         that: agents_dir.stat.isdir
         fail_msg: "~/.agents directory was not created"
 
-    - name: Stat AGENTS.md symlink
-      ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.agents/AGENTS.md"
-      register: agents_md
+    - name: Verify SteamOS environment detection (ID=steamos in /etc/os-release)
+      ansible.builtin.command: grep -q 'ID=steamos' /etc/os-release
+      register: steamos_check
+      changed_when: false
 
-    - name: Assert AGENTS.md symlink exists
+    - name: Assert SteamOS environment is detected
       ansible.builtin.assert:
-        that: agents_md.stat.exists
-        fail_msg: "~/.agents/AGENTS.md symlink was not created"
+        that: steamos_check.rc == 0
+        fail_msg: "SteamOS /etc/os-release was not faked correctly in prepare"

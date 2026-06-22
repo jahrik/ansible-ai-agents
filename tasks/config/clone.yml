@@ -4,6 +4,7 @@
     name: git
     state: present
   become: true
+  when: ansible_distribution_release | default('') != 'holo'
 
 - name: Ensure config destination directory exists
   ansible.builtin.file:

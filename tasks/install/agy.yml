@@ -1,8 +1,26 @@
 ---
-# Install AGY (Antigravity CLI) via npm
-- name: Install AGY (Antigravity CLI)
-  community.general.npm:
-    name: "@google/agy"
-    global: true
-    state: present
-  become: false
+# Install AGY (Antigravity CLI) via official installer script
+- name: Check if agy is already installed
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.local/bin/agy"
+  register: agy_binary
+
+- name: Download AGY installer script
+  ansible.builtin.get_url:
+    url: https://antigravity.google/cli/install.sh
+    dest: /tmp/agy_install.sh
+    mode: '0755'
+  when: not agy_binary.stat.exists
+
+- name: Run AGY installer script
+  ansible.builtin.command:
+    cmd: /tmp/agy_install.sh
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/agy"
+  when: not agy_binary.stat.exists
+
+- name: Clean up AGY installer script
+  ansible.builtin.file:
+    path: /tmp/agy_install.sh
+    state: absent
+  when: not agy_binary.stat.exists

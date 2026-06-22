@@ -4,18 +4,18 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: ubuntu
-    image: geerlingguy/docker-ubuntu2404-ansible
-    pre_build_image: true
-  - name: arch
+  - name: steamdeck
     image: jahrik/docker-archlinux-ansible
     pre_build_image: true
+    privileged: true
+    security_opts:
+      - seccomp=unconfined
     pull: true
 provisioner:
   name: ansible
   inventory:
     host_vars:
-      arch:
+      steamdeck:
         ansible_user: ansible
 verifier:
   name: ansible

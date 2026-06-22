@@ -1,0 +1,28 @@
+---
+- name: Prepare
+  hosts: all
+  tasks:
+    - name: Upgrade all packages to current (Arch)
+      become: true
+      community.general.pacman:
+        upgrade: true
+        update_cache: true
+      changed_when: false
+      when: ansible_os_family == 'Archlinux'
+
+    - name: Install curl (Arch)
+      become: true
+      community.general.pacman:
+        name:
+          - curl
+        state: present
+      when: ansible_os_family == 'Archlinux'
+
+    - name: Install curl (Debian/Ubuntu)
+      become: true
+      ansible.builtin.apt:
+        name:
+          - curl
+        state: present
+        update_cache: true
+      when: ansible_os_family == 'Debian'

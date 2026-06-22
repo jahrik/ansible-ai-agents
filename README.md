@@ -63,7 +63,7 @@ agent-config/
           cursor: false
 ```
 
-## Composing with ansible-arch-workstation
+## Composing with another role
 
 ```yaml
 # requirements.yml
@@ -72,12 +72,12 @@ agent-config/
 
 ## Testing
 
-Uses [Molecule](https://molecule.readthedocs.io/) with Docker driver via Podman:
+[Molecule](https://molecule.readthedocs.io/)
 
 ```bash
-mtest converge
-mtest verify
-mtest destroy
+molecule converge
+molecule verify
+molecule destroy
 ```
 
 ## License
