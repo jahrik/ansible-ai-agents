@@ -41,6 +41,8 @@ The config repo should follow this structure:
 ```
 agent-config/
 ├── AGENTS.md          # global rules — all agents read this
+├── agents/            # Claude Code subagent personas → ~/.claude/agents/
+│   └── <agent>.md
 └── skills/            # modular skill packs (AGY auto-discovers these)
     └── <skill>/
         └── SKILL.md
