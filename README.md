@@ -72,12 +72,12 @@ agent-config/
 
 ## Testing
 
-[Molecule](https://molecule.readthedocs.io/)
-
 ```bash
-molecule converge
-molecule verify
-molecule destroy
+uv sync
+source .venv/bin/activate
+yamllint .
+ansible-lint
+molecule test
 ```
 
 ## License

@@ -19,6 +19,13 @@ Installs and configures AI coding agents across OS environments. See `README.md`
 
 - Use FQCN for all Ansible modules (`ansible.builtin.*`)
 - New agents: add a task file at `tasks/install/<agent_name>.yml` and a key in `defaults/main.yml`
-- Test with `mtest converge && mtest verify`
+- Test with:
+  ```bash
+  uv sync
+  source .venv/bin/activate
+  yamllint .
+  ansible-lint
+  molecule test
+  ```
 - Never hardcode credentials or paths — use variables from `defaults/main.yml`
 - CI runs on every PR via GitHub Actions (yamllint → molecule → galaxy publish on merge)
