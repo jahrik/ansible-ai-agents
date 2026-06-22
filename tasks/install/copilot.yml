@@ -1,0 +1,8 @@
+---
+# Install GitHub Copilot CLI extension
+- name: Install GitHub Copilot CLI extension
+  ansible.builtin.command:
+    cmd: gh extension install github/gh-copilot
+  register: copilot_install
+  changed_when: "'already installed' not in copilot_install.stderr"
+  failed_when: copilot_install.rc != 0 and 'already installed' not in copilot_install.stderr

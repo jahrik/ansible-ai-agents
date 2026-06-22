@@ -1,0 +1,7 @@
+---
+- name: Install and configure AI coding agents
+  hosts: all
+  roles:
+    - role: ai_agents
+      vars:
+        ai_agents_config_repo: "https://github.com/jahrik/agent-config"

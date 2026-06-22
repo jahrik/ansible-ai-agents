@@ -1,0 +1,30 @@
+---
+galaxy_info:
+  author: jahrik
+  description: Install and configure AI coding agents (AGY, Claude Code, Copilot, Cursor, etc.)
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Archlinux
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+    - name: Fedora
+      versions:
+        - all
+    - name: MacOSX
+      versions:
+        - all
+  galaxy_tags:
+    - ai
+    - agents
+    - claude
+    - copilot
+    - cursor
+    - developer
+    - dotfiles
+
+dependencies: []

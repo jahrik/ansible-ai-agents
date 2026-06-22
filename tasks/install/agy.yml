@@ -1,0 +1,8 @@
+---
+# Install AGY (Antigravity CLI) via npm
+- name: Install AGY (Antigravity CLI)
+  community.general.npm:
+    name: "@google/agy"
+    global: true
+    state: present
+  become: false

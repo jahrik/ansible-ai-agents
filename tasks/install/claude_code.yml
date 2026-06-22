@@ -1,0 +1,8 @@
+---
+# Install Claude Code via npm
+- name: Install Claude Code CLI
+  community.general.npm:
+    name: "@anthropic-ai/claude-code"
+    global: true
+    state: present
+  become: false

@@ -1,0 +1,19 @@
+---
+- name: Include OS-specific variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution | lower }}.yml"
+    - "{{ ansible_os_family | lower }}.yml"
+    - "default.yml"
+  ignore_errors: true
+
+- name: Install agents
+  ansible.builtin.include_tasks: "install/{{ item.key }}.yml"
+  loop: "{{ ai_agents_install | dict2items }}"
+  when: item.value | bool
+
+- name: Clone agent config repo
+  ansible.builtin.include_tasks: config/clone.yml
+
+- name: Create symlinks
+  ansible.builtin.include_tasks: config/symlinks.yml

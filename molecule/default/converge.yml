@@ -1,0 +1,14 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: ansible-ai-agents
+      vars:
+        # Use a minimal test config repo — no real secrets needed
+        ai_agents_config_repo: "https://github.com/jahrik/agent-config"
+        ai_agents_config_ref: "main"
+        ai_agents_install:
+          agy: false        # skip npm installs in CI containers
+          claude_code: false
+          copilot: false
+          cursor: false

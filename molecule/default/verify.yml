@@ -1,0 +1,23 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Check that ~/.agents directory exists
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.agents"
+      register: agents_dir
+
+    - name: Assert ~/.agents exists
+      ansible.builtin.assert:
+        that: agents_dir.stat.isdir
+        fail_msg: "~/.agents directory was not created"
+
+    - name: Check that agent config was cloned
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.config/agents"
+      register: config_dest
+
+    - name: Assert config repo was cloned
+      ansible.builtin.assert:
+        that: config_dest.stat.exists
+        fail_msg: "agent config repo was not cloned"

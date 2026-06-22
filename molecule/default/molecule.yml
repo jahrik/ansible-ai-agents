@@ -1,0 +1,25 @@
+---
+driver:
+  name: docker
+
+platforms:
+  - name: archlinux
+    image: archlinux:latest
+    pre_build_image: true
+    command: /usr/sbin/init
+    privileged: true
+
+  - name: ubuntu
+    image: ubuntu:24.04
+    pre_build_image: true
+    command: /lib/systemd/systemd
+    privileged: true
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      interpreter_python: auto_silent
+
+verifier:
+  name: ansible

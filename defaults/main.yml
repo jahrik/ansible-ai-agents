@@ -1,0 +1,22 @@
+---
+# Which agents to install
+ai_agents_install:
+  agy: true
+  claude_code: true
+  copilot: false
+  cursor: false
+
+# Config repo — override this with your own fork
+ai_agents_config_repo: "https://github.com/jahrik/agent-config"
+ai_agents_config_ref: "main"
+ai_agents_config_dest: "{{ ansible_env.HOME }}/.config/agents"
+
+# Symlink targets (tool reads from here → points to config repo)
+ai_agents_symlinks:
+  - src: "{{ ai_agents_config_dest }}/AGENTS.md"
+    dest: "{{ ansible_env.HOME }}/.agents/AGENTS.md"
+  - src: "{{ ai_agents_config_dest }}/skills"
+    dest: "{{ ansible_env.HOME }}/.agents/skills"
+
+# Package manager overrides per OS family (set automatically but can override)
+ai_agents_pkg_mgr: "{{ 'pacman' if ansible_os_family == 'Archlinux' else 'apt' if ansible_os_family == 'Debian' else 'brew' if ansible_os_family == 'Darwin' else 'auto' }}"
