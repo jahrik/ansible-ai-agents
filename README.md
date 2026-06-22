@@ -18,15 +18,15 @@ that all agents read.
 
 ## Role Variables
 
-| Variable                        | Default                                  | Description                                     |
-| ------------------------------- | ---------------------------------------- | ----------------------------------------------- |
-| `ai_agents_config_repo`         | `https://github.com/jahrik/agent-config` | Git URL of your agent config repo               |
-| `ai_agents_config_ref`          | `main`                                   | Branch or tag to check out                      |
-| `ai_agents_config_dest`         | `~/.config/agents`                       | Where the config repo is cloned                 |
-| `ai_agents_install.agy`         | `true`                                   | Install AGY (Antigravity CLI)                   |
-| `ai_agents_install.claude_code` | `true`                                   | Install Claude Code CLI                         |
-| `ai_agents_install.copilot`     | `false`                                  | Install GitHub Copilot CLI extension            |
-| `ai_agents_install.cursor`      | `false`                                  | Install Cursor — _planned, not yet implemented_ |
+| Variable                        | Default                                  | Description                                                                  |
+| ------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------- |
+| `ai_agents_config_repo`         | `https://github.com/jahrik/agent-config` | Git URL of your agent config repo                                            |
+| `ai_agents_config_ref`          | `main`                                   | Branch or tag to check out                                                   |
+| `ai_agents_config_dest`         | `~/.config/agents`                       | Where the config repo is cloned                                              |
+| `ai_agents_install.agy`         | `true`                                   | Install AGY (Antigravity CLI)                                                |
+| `ai_agents_install.claude_code` | `true`                                   | Install Claude Code CLI                                                      |
+| `ai_agents_install.copilot`     | `false`                                  | Install GitHub Copilot CLI extension                                         |
+| `ai_agents_install.cursor`      | `false`                                  | Install Cursor (Homebrew cask on macOS; AppImage to `~/.local/bin` on Linux) |
 
 ## Bring Your Own Config Repo
 

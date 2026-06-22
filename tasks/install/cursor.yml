@@ -1,0 +1,47 @@
+---
+# Install the Cursor editor.
+# - macOS: Homebrew cask.
+# - Linux (Arch / Debian / SteamOS): download the latest self-contained
+#   AppImage to ~/.local/bin (no root needed). Running the AppImage requires
+#   FUSE on the target host.
+- name: Install Cursor (macOS)
+  community.general.homebrew_cask:
+    name: cursor
+    state: present
+  become: false
+  when: ansible_os_family == 'Darwin'
+
+- name: Check if Cursor is already installed (Linux)
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.local/bin/cursor"
+  register: cursor_binary
+  when: ansible_os_family != 'Darwin'
+
+- name: Ensure ~/.local/bin exists (Linux)
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.local/bin"
+    state: directory
+    mode: "0755"
+  when:
+    - ansible_os_family != 'Darwin'
+    - not cursor_binary.stat.exists
+
+- name: Query the latest Cursor AppImage URL (Linux)
+  ansible.builtin.uri:
+    url: "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable"
+    headers:
+      User-Agent: "ansible-ai-agents"
+    return_content: true
+  register: cursor_api
+  when:
+    - ansible_os_family != 'Darwin'
+    - not cursor_binary.stat.exists
+
+- name: Download the Cursor AppImage (Linux)
+  ansible.builtin.get_url:
+    url: "{{ cursor_api.json.downloadUrl }}"
+    dest: "{{ ansible_env.HOME }}/.local/bin/cursor"
+    mode: "0755"
+  when:
+    - ansible_os_family != 'Darwin'
+    - not cursor_binary.stat.exists
