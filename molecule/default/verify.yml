@@ -63,12 +63,12 @@
         that: claude_agents.stat.exists
         fail_msg: "~/.claude/agents symlink was not created"
 
-    - name: Stat ~/.copilot/copilot-instructions.md symlink
+    - name: Stat ~/.gemini/config/AGENTS.md symlink
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.copilot/copilot-instructions.md"
-      register: copilot_instructions
+        path: "{{ ansible_env.HOME }}/.gemini/config/AGENTS.md"
+      register: gemini_agents
 
-    - name: Assert ~/.copilot/copilot-instructions.md symlink exists
+    - name: Assert ~/.gemini/config/AGENTS.md symlink exists
       ansible.builtin.assert:
-        that: copilot_instructions.stat.exists
-        fail_msg: "~/.copilot/copilot-instructions.md symlink was not created"
+        that: gemini_agents.stat.exists
+        fail_msg: "~/.gemini/config/AGENTS.md symlink was not created"

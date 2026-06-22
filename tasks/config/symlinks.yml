@@ -6,9 +6,8 @@
     mode: "0755"
   loop:
     - "{{ ansible_env.HOME }}/.agents"
-    - "{{ ansible_env.HOME }}/.gemini"
+    - "{{ ansible_env.HOME }}/.gemini/config"
     - "{{ ansible_env.HOME }}/.claude"
-    - "{{ ansible_env.HOME }}/.copilot"
 
 - name: Create symlinks from config repo to tool-expected locations
   ansible.builtin.file:
@@ -18,14 +17,6 @@
     force: true
     follow: false
   loop: "{{ ai_agents_symlinks }}"
-
-- name: Symlink ~/.gemini/config → agent config (AGY/Antigravity)
-  ansible.builtin.file:
-    src: "{{ ai_agents_config_dest }}"
-    dest: "{{ ansible_env.HOME }}/.gemini/config"
-    state: link
-    force: true
-    follow: false
 
 # Claude Code reads ~/.claude/CLAUDE.md as its global config; point that at the
 # config repo's AGENTS.md so there is one source of truth. Project-level files

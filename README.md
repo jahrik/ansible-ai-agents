@@ -5,15 +5,14 @@
 
 Ansible role to install and configure AI coding agents across Linux and macOS environments.
 
-Installs agents (AGY/Antigravity, Claude Code, GitHub Copilot, Cursor) and wires up a
-pluggable **agent-config repo** — a separate repository of `AGENTS.md` rules and skills
+Installs agents (AGY/Antigravity, Claude Code) and wires up a pluggable
+**agent-config repo** — a separate repository of `AGENTS.md` rules and skills
 that all agents read.
 
 ## Requirements
 
 - Ansible 2.16+
 - `git` on target host (to clone the agent-config repo)
-- `gh` CLI on target host (only if `copilot` is enabled)
 
 ## Role Variables
 
@@ -24,7 +23,6 @@ that all agents read.
 | `ai_agents_config_dest`         | `~/.config/agents`                       | Where the config repo is cloned                 |
 | `ai_agents_install.agy`         | `true`                                   | Install AGY (Antigravity CLI)                   |
 | `ai_agents_install.claude_code` | `true`                                   | Install Claude Code CLI                         |
-| `ai_agents_install.copilot`     | `false`                                  | Install GitHub Copilot CLI extension            |
 | `ai_agents_install.cursor`      | `false`                                  | Install Cursor — _planned, not yet implemented_ |
 
 ## Bring Your Own Config Repo
@@ -59,7 +57,6 @@ agent-config/
         ai_agents_install:
           agy: true
           claude_code: true
-          copilot: false
           cursor: false
 ```
 

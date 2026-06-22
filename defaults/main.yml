@@ -3,7 +3,6 @@
 ai_agents_install:
   agy: true
   claude_code: true
-  copilot: false
   cursor: false
 
 # Config repo — override this with your own fork
@@ -21,5 +20,10 @@ ai_agents_symlinks:
     dest: "{{ ansible_env.HOME }}/.claude/skills"
   - src: "{{ ai_agents_config_dest }}/agents"
     dest: "{{ ansible_env.HOME }}/.claude/agents"
+  # AGY/Antigravity reads its Global Customizations Root at ~/.gemini/config/
+  # (AGENTS.md + skills/). Link into that dir — do not replace it; AGY keeps its
+  # own mcp_config.json and projects/ there.
   - src: "{{ ai_agents_config_dest }}/AGENTS.md"
-    dest: "{{ ansible_env.HOME }}/.copilot/copilot-instructions.md"
+    dest: "{{ ansible_env.HOME }}/.gemini/config/AGENTS.md"
+  - src: "{{ ai_agents_config_dest }}/skills"
+    dest: "{{ ansible_env.HOME }}/.gemini/config/skills"
