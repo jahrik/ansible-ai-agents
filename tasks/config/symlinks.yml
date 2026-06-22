@@ -8,6 +8,7 @@
     - "{{ ansible_env.HOME }}/.agents"
     - "{{ ansible_env.HOME }}/.gemini"
     - "{{ ansible_env.HOME }}/.claude"
+    - "{{ ansible_env.HOME }}/.copilot"
 
 - name: Create symlinks from config repo to tool-expected locations
   ansible.builtin.file:
