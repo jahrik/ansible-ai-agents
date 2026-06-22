@@ -27,10 +27,13 @@
     force: true
     follow: false
 
-- name: Symlink AGENTS.md into ~/.claude for Claude Code
+# Claude Code reads ~/.claude/CLAUDE.md as its global config; point that at the
+# config repo's AGENTS.md so there is one source of truth. Project-level files
+# stay named AGENTS.md.
+- name: Symlink config AGENTS.md to ~/.claude/CLAUDE.md (Claude Code global config)
   ansible.builtin.file:
     src: "{{ ai_agents_config_dest }}/AGENTS.md"
-    dest: "{{ ansible_env.HOME }}/.claude/AGENTS.md"
+    dest: "{{ ansible_env.HOME }}/.claude/CLAUDE.md"
     state: link
     force: true
     follow: false
