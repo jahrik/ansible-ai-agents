@@ -17,3 +17,5 @@ ai_agents_symlinks:
     dest: "{{ ansible_env.HOME }}/.agents/AGENTS.md"
   - src: "{{ ai_agents_config_dest }}/skills"
     dest: "{{ ansible_env.HOME }}/.agents/skills"
+  - src: "{{ ai_agents_config_dest }}/skills"
+    dest: "{{ ansible_env.HOME }}/.claude/skills"

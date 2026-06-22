@@ -33,3 +33,13 @@
       ansible.builtin.assert:
         that: steamos_check.rc == 0
         fail_msg: "SteamOS /etc/os-release was not faked correctly in prepare"
+
+    - name: Stat ~/.claude/skills symlink
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.claude/skills"
+      register: claude_skills
+
+    - name: Assert ~/.claude/skills symlink exists
+      ansible.builtin.assert:
+        that: claude_skills.stat.exists
+        fail_msg: "~/.claude/skills symlink was not created"

@@ -42,3 +42,13 @@
       ansible.builtin.assert:
         that: agents_md.stat.exists
         fail_msg: "~/.agents/AGENTS.md symlink was not created"
+
+    - name: Stat ~/.claude/skills symlink
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.claude/skills"
+      register: claude_skills
+
+    - name: Assert ~/.claude/skills symlink exists
+      ansible.builtin.assert:
+        that: claude_skills.stat.exists
+        fail_msg: "~/.claude/skills symlink was not created"
