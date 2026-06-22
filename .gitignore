@@ -2,3 +2,4 @@
 .venv/
 *.log
 uv.lock
+node_modules/
