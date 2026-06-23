@@ -10,9 +10,21 @@
         - "vars"
       skip: true
 
+- name: Fail clearly if an enabled agent has no installer
+  ansible.builtin.assert:
+    that: item.key in ai_agents_implemented
+    fail_msg: >-
+      No installer for agent '{{ item.key }}'.
+      Implemented agents: {{ ai_agents_implemented | join(', ') }}.
+  loop: "{{ ai_agents_install | dict2items | selectattr('value') | list }}"
+  loop_control:
+    label: "{{ item.key }}"
+
 - name: Install agents
   ansible.builtin.include_tasks: "install/{{ item.key }}.yml"
   loop: "{{ ai_agents_install | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
   when: item.value | bool
 
 - name: Clone agent config repo

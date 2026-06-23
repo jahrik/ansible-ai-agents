@@ -5,6 +5,13 @@ ai_agents_install:
   claude_code: true
   cursor: false
 
+# Agents that have an installer task (tasks/install/<name>.yml). Enabling an
+# agent that is not in this list fails early with a clear message instead of a
+# cryptic missing-include error. `cursor` is a placeholder until implemented.
+ai_agents_implemented:
+  - agy
+  - claude_code
+
 # Config repo — override this with your own fork
 ai_agents_config_repo: "https://github.com/jahrik/agent-config"
 ai_agents_config_ref: "main"
