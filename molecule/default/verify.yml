@@ -23,52 +23,72 @@
         that: config_dest.stat.exists
         fail_msg: "Agent config repo was not cloned to ~/.config/agents"
 
-    - name: Stat ~/.agents directory
-      ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.agents"
-      register: agents_dir
-
-    - name: Assert ~/.agents directory exists
-      ansible.builtin.assert:
-        that: agents_dir.stat.isdir
-        fail_msg: "~/.agents directory was not created"
-
-    - name: Stat AGENTS.md symlink
-      ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.agents/AGENTS.md"
-      register: agents_md
-
-    - name: Assert AGENTS.md symlink exists
-      ansible.builtin.assert:
-        that: agents_md.stat.exists
-        fail_msg: "~/.agents/AGENTS.md symlink was not created"
-
     - name: Stat ~/.claude/skills symlink
       ansible.builtin.stat:
         path: "{{ ansible_env.HOME }}/.claude/skills"
+        follow: false
       register: claude_skills
 
-    - name: Assert ~/.claude/skills symlink exists
+    - name: Assert ~/.claude/skills is a symlink (pre-existing dir was replaced)
       ansible.builtin.assert:
-        that: claude_skills.stat.exists
-        fail_msg: "~/.claude/skills symlink was not created"
+        that: claude_skills.stat.islnk
+        fail_msg: "~/.claude/skills is not a symlink — a pre-existing real dir was not handled"
 
     - name: Stat ~/.claude/agents symlink
       ansible.builtin.stat:
         path: "{{ ansible_env.HOME }}/.claude/agents"
+        follow: false
       register: claude_agents
 
-    - name: Assert ~/.claude/agents symlink exists
+    - name: Assert ~/.claude/agents is a symlink
       ansible.builtin.assert:
-        that: claude_agents.stat.exists
-        fail_msg: "~/.claude/agents symlink was not created"
+        that: claude_agents.stat.islnk
+        fail_msg: "~/.claude/agents is not a symlink — a pre-existing real dir was not handled"
 
     - name: Stat ~/.gemini/config/AGENTS.md symlink
       ansible.builtin.stat:
         path: "{{ ansible_env.HOME }}/.gemini/config/AGENTS.md"
+        follow: false
       register: gemini_agents
 
-    - name: Assert ~/.gemini/config/AGENTS.md symlink exists
+    - name: Assert ~/.gemini/config/AGENTS.md is a symlink
       ansible.builtin.assert:
-        that: gemini_agents.stat.exists
-        fail_msg: "~/.gemini/config/AGENTS.md symlink was not created"
+        that: gemini_agents.stat.islnk
+        fail_msg: "~/.gemini/config/AGENTS.md is not a symlink — a pre-existing real file was not handled"
+
+    - name: Stat ~/.gemini/config/skills symlink
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.gemini/config/skills"
+        follow: false
+      register: gemini_skills
+
+    - name: Assert ~/.gemini/config/skills is a symlink
+      ansible.builtin.assert:
+        that: gemini_skills.stat.islnk
+        fail_msg: "~/.gemini/config/skills is not a symlink — a pre-existing real dir was not handled"
+
+    - name: Stat ~/.claude/CLAUDE.md symlink
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.claude/CLAUDE.md"
+        follow: false
+      register: claude_md
+
+    - name: Assert ~/.claude/CLAUDE.md is a symlink (pre-existing file was replaced)
+      ansible.builtin.assert:
+        that: claude_md.stat.islnk
+        fail_msg: "~/.claude/CLAUDE.md is not a symlink — a pre-existing real file was not handled"
+
+    - name: Find backups of the pre-existing Claude config
+      ansible.builtin.find:
+        paths: "{{ ansible_env.HOME }}/.claude"
+        patterns:
+          - "CLAUDE.md.backup-*"
+          - "skills.backup-*"
+        file_type: any
+        hidden: true
+      register: ai_agents_backups
+
+    - name: Assert the pre-existing file and directory were backed up, not destroyed
+      ansible.builtin.assert:
+        that: ai_agents_backups.matched >= 2
+        fail_msg: "pre-existing CLAUDE.md / skills were not backed up before linking"

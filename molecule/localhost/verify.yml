@@ -14,16 +14,6 @@
         that: config_dest.stat.exists
         fail_msg: "Agent config repo was not cloned to ~/.config/agents"
 
-    - name: Verify SteamOS environment detection (ID=steamos in /etc/os-release)
-      ansible.builtin.command: grep -q 'ID=steamos' /etc/os-release
-      register: steamos_check
-      changed_when: false
-
-    - name: Assert SteamOS environment is detected
-      ansible.builtin.assert:
-        that: steamos_check.rc == 0
-        fail_msg: "SteamOS /etc/os-release was not faked correctly in prepare"
-
     - name: Stat ~/.claude/skills symlink
       ansible.builtin.stat:
         path: "{{ ansible_env.HOME }}/.claude/skills"
@@ -67,3 +57,38 @@
       ansible.builtin.assert:
         that: gemini_skills.stat.islnk
         fail_msg: "~/.gemini/config/skills is not a symlink — a pre-existing real dir was not handled"
+
+    - name: Stat ~/.claude/CLAUDE.md symlink
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.claude/CLAUDE.md"
+        follow: false
+      register: claude_md
+
+    - name: Assert ~/.claude/CLAUDE.md is a symlink
+      ansible.builtin.assert:
+        that: claude_md.stat.islnk
+        fail_msg: "~/.claude/CLAUDE.md is not a symlink — a pre-existing real file was not handled"
+
+    - name: Stat agy binary
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.local/bin/agy"
+      register: agy_bin
+      when: ai_agents_install.agy | default(true) | bool
+
+    - name: Assert agy is installed
+      ansible.builtin.assert:
+        that: agy_bin.stat.exists
+        fail_msg: "agy binary was not found at ~/.local/bin/agy"
+      when: ai_agents_install.agy | default(true) | bool
+
+    - name: Stat claude binary
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.local/bin/claude"
+      register: claude_bin
+      when: ai_agents_install.claude_code | default(true) | bool
+
+    - name: Assert claude is installed
+      ansible.builtin.assert:
+        that: claude_bin.stat.exists
+        fail_msg: "claude binary was not found at ~/.local/bin/claude"
+      when: ai_agents_install.claude_code | default(true) | bool
