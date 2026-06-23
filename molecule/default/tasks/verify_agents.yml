@@ -1,0 +1,41 @@
+---
+# Verify each agent's binary is installed and its config is wired up.
+- name: Stat agy binary
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.local/bin/agy"
+  register: agy_bin
+- name: Assert agy is installed
+  ansible.builtin.assert:
+    that: agy_bin.stat.exists
+
+- name: Stat claude binary
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.local/bin/claude"
+  register: claude_bin
+- name: Assert claude is installed
+  ansible.builtin.assert:
+    that: claude_bin.stat.exists
+
+- name: Stat aider binary
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.local/bin/aider"
+  register: aider_bin
+- name: Assert aider is installed
+  ansible.builtin.assert:
+    that: aider_bin.stat.exists
+
+- name: Stat codex binary
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.local/bin/codex"
+  register: codex_bin
+- name: Assert codex is installed
+  ansible.builtin.assert:
+    that: codex_bin.stat.exists
+
+- name: Stat aider config file
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.aider.conf.yml"
+  register: aider_conf
+- name: Assert aider config file exists
+  ansible.builtin.assert:
+    that: aider_conf.stat.exists

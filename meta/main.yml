@@ -2,7 +2,7 @@ galaxy_info:
   role_name: ai_agents
   author: jahrik
   namespace: jahrik
-  description: Install and configure AI coding agents (AGY, Claude Code, Copilot, Cursor, etc.)
+  description: Install and configure AI coding agents (AGY, Claude Code, etc.)
   issue_tracker_url: https://github.com/jahrik/ansible-ai-agents/issues
   license: MIT
   min_ansible_version: '2.16'

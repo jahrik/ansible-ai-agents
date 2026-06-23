@@ -5,3 +5,10 @@
     - name: "Include jahrik.ai_agents"
       ansible.builtin.include_role:
         name: "jahrik.ai_agents"
+      vars:
+        ai_agents_install:
+          agy: true
+          claude_code: true
+          aider: true
+          codex: true
+          cursor: false

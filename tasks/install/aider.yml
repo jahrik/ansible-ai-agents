@@ -1,0 +1,17 @@
+---
+# Install Aider CLI via its official installer script
+- name: Install Aider via its installer script
+  ansible.builtin.include_tasks: _install_script.yml
+  vars:
+    install_name: Aider
+    install_url: https://aider.chat/install.sh
+    install_binary: "{{ ansible_env.HOME }}/.local/bin/aider"
+
+# Point Aider at the shared AGENTS.md conventions (read-only context).
+- name: Configure Aider to read global AGENTS.md conventions
+  ansible.builtin.copy:
+    dest: "{{ ansible_env.HOME }}/.aider.conf.yml"
+    content: |
+      read:
+        - {{ ai_agents_config_dest }}/AGENTS.md
+    mode: '0644'

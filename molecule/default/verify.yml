@@ -92,3 +92,6 @@
       ansible.builtin.assert:
         that: ai_agents_backups.matched >= 2
         fail_msg: "pre-existing CLAUDE.md / skills were not backed up before linking"
+
+    - name: Verify installed agents and their config wiring
+      ansible.builtin.include_tasks: tasks/verify_agents.yml
