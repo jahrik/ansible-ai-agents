@@ -1,8 +1,33 @@
 ---
 # Install Claude Code CLI via its official installer script
-- name: Install Claude Code via its installer script
-  ansible.builtin.include_tasks: _install_script.yml
-  vars:
-    install_name: Claude Code
-    install_url: https://claude.ai/install.sh
-    install_binary: "{{ ansible_env.HOME }}/.local/bin/claude"
+- name: Check whether already installed
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.local/bin/claude"
+  register: claude_binary
+
+- name: Create a private temp directory
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: install
+  register: claude_tmp
+  when: not claude_binary.stat.exists
+
+- name: Download the installer script
+  ansible.builtin.get_url:
+    url: https://claude.ai/install.sh
+    dest: "{{ claude_tmp.path }}/install.sh"
+    mode: '0700'
+  when: not claude_binary.stat.exists
+
+- name: Run the installer script
+  ansible.builtin.command:
+    cmd: "{{ claude_tmp.path }}/install.sh"
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/claude"
+  when: not claude_binary.stat.exists
+
+- name: Remove the temp directory
+  ansible.builtin.file:
+    path: "{{ claude_tmp.path }}"
+    state: absent
+  when: not claude_binary.stat.exists

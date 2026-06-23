@@ -1,8 +1,33 @@
 ---
 # Install AGY (Antigravity CLI) via its official installer script
-- name: Install AGY via its installer script
-  ansible.builtin.include_tasks: _install_script.yml
-  vars:
-    install_name: AGY
-    install_url: https://antigravity.google/cli/install.sh
-    install_binary: "{{ ansible_env.HOME }}/.local/bin/agy"
+- name: Check whether already installed
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.local/bin/agy"
+  register: agy_binary
+
+- name: Create a private temp directory
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: install
+  register: agy_tmp
+  when: not agy_binary.stat.exists
+
+- name: Download the installer script
+  ansible.builtin.get_url:
+    url: https://antigravity.google/cli/install.sh
+    dest: "{{ agy_tmp.path }}/install.sh"
+    mode: '0700'
+  when: not agy_binary.stat.exists
+
+- name: Run the installer script
+  ansible.builtin.command:
+    cmd: "{{ agy_tmp.path }}/install.sh"
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/agy"
+  when: not agy_binary.stat.exists
+
+- name: Remove the temp directory
+  ansible.builtin.file:
+    path: "{{ agy_tmp.path }}"
+    state: absent
+  when: not agy_binary.stat.exists
