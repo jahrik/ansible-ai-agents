@@ -1,0 +1,65 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: true
+  tasks:
+
+    - name: Stat agent config destination
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.config/agents"
+      register: config_dest
+
+    - name: Assert agent config repo was cloned
+      ansible.builtin.assert:
+        that: config_dest.stat.exists
+        fail_msg: "Agent config repo was not cloned to ~/.config/agents"
+
+    - name: Stat ~/.agents directory
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.agents"
+      register: agents_dir
+
+    - name: Assert ~/.agents directory exists
+      ansible.builtin.assert:
+        that: agents_dir.stat.isdir
+        fail_msg: "~/.agents directory was not created"
+
+    - name: Verify SteamOS environment detection (ID=steamos in /etc/os-release)
+      ansible.builtin.command: grep -q 'ID=steamos' /etc/os-release
+      register: steamos_check
+      changed_when: false
+
+    - name: Assert SteamOS environment is detected
+      ansible.builtin.assert:
+        that: steamos_check.rc == 0
+        fail_msg: "SteamOS /etc/os-release was not faked correctly in prepare"
+
+    - name: Stat ~/.claude/skills symlink
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.claude/skills"
+      register: claude_skills
+
+    - name: Assert ~/.claude/skills symlink exists
+      ansible.builtin.assert:
+        that: claude_skills.stat.exists
+        fail_msg: "~/.claude/skills symlink was not created"
+
+    - name: Stat ~/.claude/agents symlink
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.claude/agents"
+      register: claude_agents
+
+    - name: Assert ~/.claude/agents symlink exists
+      ansible.builtin.assert:
+        that: claude_agents.stat.exists
+        fail_msg: "~/.claude/agents symlink was not created"
+
+    - name: Stat ~/.gemini/config/AGENTS.md symlink
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.gemini/config/AGENTS.md"
+      register: gemini_agents
+
+    - name: Assert ~/.gemini/config/AGENTS.md symlink exists
+      ansible.builtin.assert:
+        that: gemini_agents.stat.exists
+        fail_msg: "~/.gemini/config/AGENTS.md symlink was not created"
