@@ -3,30 +3,30 @@
 ai_agents_install:
   agy: true
   claude_code: true
+  aider: false
+  codex: false
   cursor: false
-
-# Agents that have an installer task (tasks/install/<name>.yml). Enabling an
-# agent that is not in this list fails early with a clear message instead of a
-# cryptic missing-include error. `cursor` is a placeholder until implemented.
-ai_agents_implemented:
-  - agy
-  - claude_code
 
 # Config repo — override this with your own fork
 ai_agents_config_repo: "https://github.com/jahrik/agent-config"
 ai_agents_config_ref: "main"
 ai_agents_config_dest: "{{ ansible_env.HOME }}/.config/agents"
 
+# When a symlink target already exists as a real file or directory, move it aside
+# to "<dest>.backup-<timestamp>" before linking, instead of failing or destroying
+# it. Set false only if you are certain no conflicting files exist.
+ai_agents_backup_existing: true
+
 # Symlink targets (tool reads from here → points to config repo)
 ai_agents_symlinks:
-  - src: "{{ ai_agents_config_dest }}/AGENTS.md"
-    dest: "{{ ansible_env.HOME }}/.agents/AGENTS.md"
-  - src: "{{ ai_agents_config_dest }}/skills"
-    dest: "{{ ansible_env.HOME }}/.agents/skills"
   - src: "{{ ai_agents_config_dest }}/skills"
     dest: "{{ ansible_env.HOME }}/.claude/skills"
   - src: "{{ ai_agents_config_dest }}/agents"
     dest: "{{ ansible_env.HOME }}/.claude/agents"
+  # Claude Code reads ~/.claude/CLAUDE.md as its global config — point it at the
+  # config repo's AGENTS.md so there is one source of truth.
+  - src: "{{ ai_agents_config_dest }}/AGENTS.md"
+    dest: "{{ ansible_env.HOME }}/.claude/CLAUDE.md"
   # AGY/Antigravity reads its Global Customizations Root at ~/.gemini/config/
   # (AGENTS.md + skills/). Link into that dir — do not replace it; AGY keeps its
   # own mcp_config.json and projects/ there.

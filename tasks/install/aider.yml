@@ -1,0 +1,42 @@
+---
+# Install Aider CLI via its official installer script
+- name: Check whether already installed
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.local/bin/aider"
+  register: aider_binary
+
+- name: Create a private temp directory
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: install
+  register: aider_tmp
+  when: not aider_binary.stat.exists
+
+- name: Download the installer script
+  ansible.builtin.get_url:
+    url: https://aider.chat/install.sh
+    dest: "{{ aider_tmp.path }}/install.sh"
+    mode: '0700'
+  when: not aider_binary.stat.exists
+
+- name: Run the installer script
+  ansible.builtin.command:
+    cmd: "{{ aider_tmp.path }}/install.sh"
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/aider"
+  when: not aider_binary.stat.exists
+
+- name: Remove the temp directory
+  ansible.builtin.file:
+    path: "{{ aider_tmp.path }}"
+    state: absent
+  when: not aider_binary.stat.exists
+
+# Point Aider at the shared AGENTS.md conventions (read-only context).
+- name: Configure Aider to read global AGENTS.md conventions
+  ansible.builtin.copy:
+    dest: "{{ ansible_env.HOME }}/.aider.conf.yml"
+    content: |
+      read:
+        - {{ ai_agents_config_dest }}/AGENTS.md
+    mode: '0644'

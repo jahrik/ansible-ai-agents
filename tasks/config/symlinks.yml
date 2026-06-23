@@ -5,9 +5,38 @@
     state: directory
     mode: "0755"
   loop:
-    - "{{ ansible_env.HOME }}/.agents"
     - "{{ ansible_env.HOME }}/.gemini/config"
     - "{{ ansible_env.HOME }}/.claude"
+
+- name: Resolve a single backup timestamp for this run
+  ansible.builtin.set_fact:
+    ai_agents_backup_stamp: "{{ lookup('pipe', 'date +%Y%m%d-%H%M%S') }}"
+  when: ai_agents_backup_stamp is not defined
+
+- name: Stat each symlink destination
+  ansible.builtin.stat:
+    path: "{{ item.dest }}"
+    follow: false
+  loop: "{{ ai_agents_symlinks }}"
+  loop_control:
+    label: "{{ item.dest }}"
+  register: ai_agents_dest_stat
+
+# A real file or directory at the destination would otherwise fail the link
+# (directories) or be silently destroyed (files). Move it aside first. Existing
+# symlinks are left for the link task below to replace (force), since they hold
+# no data worth preserving.
+- name: Back up pre-existing real files/directories at symlink targets
+  ansible.builtin.command:
+    cmd: "mv -- '{{ item.item.dest }}' '{{ item.item.dest }}.backup-{{ ai_agents_backup_stamp }}'"
+    creates: "{{ item.item.dest }}.backup-{{ ai_agents_backup_stamp }}"
+  loop: "{{ ai_agents_dest_stat.results }}"
+  loop_control:
+    label: "{{ item.item.dest }}"
+  when:
+    - ai_agents_backup_existing | bool
+    - item.stat.exists
+    - not item.stat.islnk
 
 - name: Create symlinks from config repo to tool-expected locations
   ansible.builtin.file:
@@ -17,14 +46,5 @@
     force: true
     follow: false
   loop: "{{ ai_agents_symlinks }}"
-
-# Claude Code reads ~/.claude/CLAUDE.md as its global config; point that at the
-# config repo's AGENTS.md so there is one source of truth. Project-level files
-# stay named AGENTS.md.
-- name: Symlink config AGENTS.md to ~/.claude/CLAUDE.md (Claude Code global config)
-  ansible.builtin.file:
-    src: "{{ ai_agents_config_dest }}/AGENTS.md"
-    dest: "{{ ansible_env.HOME }}/.claude/CLAUDE.md"
-    state: link
-    force: true
-    follow: false
+  loop_control:
+    label: "{{ item.dest }}"
