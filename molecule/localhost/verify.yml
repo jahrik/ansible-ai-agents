@@ -58,6 +58,17 @@
         that: gemini_skills.stat.islnk
         fail_msg: "~/.gemini/config/skills is not a symlink — a pre-existing real dir was not handled"
 
+    - name: Stat ~/.gemini/config/agents symlink
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.gemini/config/agents"
+        follow: false
+      register: gemini_agents_dir
+
+    - name: Assert ~/.gemini/config/agents is a symlink
+      ansible.builtin.assert:
+        that: gemini_agents_dir.stat.islnk
+        fail_msg: "~/.gemini/config/agents is not a symlink — subagents are not exposed to AGY"
+
     - name: Stat ~/.claude/CLAUDE.md symlink
       ansible.builtin.stat:
         path: "{{ ansible_env.HOME }}/.claude/CLAUDE.md"
