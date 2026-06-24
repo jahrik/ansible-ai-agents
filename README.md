@@ -11,7 +11,7 @@ subagents that all agents read. It clones the config to `~/.config/agents/` and
 symlinks it into each tool:
 
 - **Claude Code** — `AGENTS.md` → `~/.claude/CLAUDE.md`, `skills/` → `~/.claude/skills`, `agents/` → `~/.claude/agents`
-- **AGY/Antigravity** — `AGENTS.md` → `~/.gemini/config/AGENTS.md`, `skills/` → `~/.gemini/config/skills`
+- **AGY/Antigravity** — `AGENTS.md` → `~/.gemini/config/AGENTS.md`, `skills/` → `~/.gemini/config/skills`, `agents/` → `~/.gemini/config/agents`
 - **Aider** — generates `~/.aider.conf.yml` to read `~/.config/agents/AGENTS.md`
 
 ## Requirements
@@ -46,9 +46,9 @@ The config repo should follow this structure:
 ```
 agent-config/
 ├── AGENTS.md          # global rules — all agents read this
-├── agents/            # Claude Code subagent personas → ~/.claude/agents/
+├── agents/            # subagent personas → ~/.claude/agents/ + ~/.gemini/config/agents/
 │   └── <agent>.md
-└── skills/            # modular skill packs (AGY auto-discovers these)
+└── skills/            # modular skill packs (both tools discover these)
     └── <skill>/
         └── SKILL.md
 ```
