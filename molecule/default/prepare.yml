@@ -8,7 +8,7 @@
         upgrade: true
         update_cache: true
       changed_when: false
-      when: ansible_os_family == 'Archlinux'
+      when: ansible_facts['os_family'] == 'Archlinux'
 
     - name: Install curl (Arch)
       become: true
@@ -16,7 +16,7 @@
         name:
           - curl
         state: present
-      when: ansible_os_family == 'Archlinux'
+      when: ansible_facts['os_family'] == 'Archlinux'
 
     - name: Install curl (Debian/Ubuntu)
       become: true
@@ -25,24 +25,24 @@
           - curl
         state: present
         update_cache: true
-      when: ansible_os_family == 'Debian'
+      when: ansible_facts['os_family'] == 'Debian'
 
     # Simulate a machine that already has real Claude config, so the role's
     # backup-then-link path is exercised (a real directory and a real file).
     - name: Pre-seed a real ~/.claude/skills directory
       ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/.claude/skills"
+        path: "{{ ansible_facts['env']['HOME'] }}/.claude/skills"
         state: directory
         mode: "0755"
 
     - name: Put a file inside the pre-existing skills directory
       ansible.builtin.copy:
-        dest: "{{ ansible_env.HOME }}/.claude/skills/old-skill.md"
+        dest: "{{ ansible_facts['env']['HOME'] }}/.claude/skills/old-skill.md"
         content: "pre-existing skill\n"
         mode: "0644"
 
     - name: Pre-seed a real ~/.claude/CLAUDE.md file
       ansible.builtin.copy:
-        dest: "{{ ansible_env.HOME }}/.claude/CLAUDE.md"
+        dest: "{{ ansible_facts['env']['HOME'] }}/.claude/CLAUDE.md"
         content: "pre-existing global config\n"
         mode: "0644"

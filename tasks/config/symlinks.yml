@@ -5,8 +5,8 @@
     state: directory
     mode: "0755"
   loop:
-    - "{{ ansible_env.HOME }}/.gemini/config"
-    - "{{ ansible_env.HOME }}/.claude"
+    - "{{ ansible_facts['env']['HOME'] }}/.gemini/config"
+    - "{{ ansible_facts['env']['HOME'] }}/.claude"
 
 - name: Resolve a single backup timestamp for this run
   ansible.builtin.set_fact:

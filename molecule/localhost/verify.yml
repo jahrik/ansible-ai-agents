@@ -6,7 +6,7 @@
 
     - name: Stat agent config destination
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.config/agents"
+        path: "{{ ansible_facts['env']['HOME'] }}/.config/agents"
       register: config_dest
 
     - name: Assert agent config repo was cloned
@@ -16,7 +16,7 @@
 
     - name: Stat ~/.claude/skills symlink
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.claude/skills"
+        path: "{{ ansible_facts['env']['HOME'] }}/.claude/skills"
         follow: false
       register: claude_skills
 
@@ -27,7 +27,7 @@
 
     - name: Stat ~/.claude/agents symlink
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.claude/agents"
+        path: "{{ ansible_facts['env']['HOME'] }}/.claude/agents"
         follow: false
       register: claude_agents
 
@@ -38,7 +38,7 @@
 
     - name: Stat ~/.gemini/config/AGENTS.md symlink
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.gemini/config/AGENTS.md"
+        path: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/AGENTS.md"
         follow: false
       register: gemini_agents
 
@@ -49,7 +49,7 @@
 
     - name: Stat ~/.gemini/config/skills symlink
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.gemini/config/skills"
+        path: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/skills"
         follow: false
       register: gemini_skills
 
@@ -60,7 +60,7 @@
 
     - name: Stat ~/.gemini/config/agents symlink
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.gemini/config/agents"
+        path: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/agents"
         follow: false
       register: gemini_agents_dir
 
@@ -71,7 +71,7 @@
 
     - name: Stat ~/.claude/CLAUDE.md symlink
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.claude/CLAUDE.md"
+        path: "{{ ansible_facts['env']['HOME'] }}/.claude/CLAUDE.md"
         follow: false
       register: claude_md
 
@@ -82,7 +82,7 @@
 
     - name: Stat agy binary
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.local/bin/agy"
+        path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/agy"
       register: agy_bin
       when: ai_agents_install.agy | default(true) | bool
 
@@ -94,7 +94,7 @@
 
     - name: Stat claude binary
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.local/bin/claude"
+        path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/claude"
       register: claude_bin
       when: ai_agents_install.claude_code | default(true) | bool
 
