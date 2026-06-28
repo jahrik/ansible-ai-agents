@@ -10,7 +10,7 @@ ai_agents_install:
 # Config repo — override this with your own fork
 ai_agents_config_repo: "https://github.com/jahrik/agent-config"
 ai_agents_config_ref: "main"
-ai_agents_config_dest: "{{ ansible_env.HOME }}/.config/agents"
+ai_agents_config_dest: "{{ ansible_facts['env']['HOME'] }}/.config/agents"
 
 # When a symlink target already exists as a real file or directory, move it aside
 # to "<dest>.backup-<timestamp>" before linking, instead of failing or destroying
@@ -20,23 +20,23 @@ ai_agents_backup_existing: true
 # Symlink targets (tool reads from here → points to config repo)
 ai_agents_symlinks:
   - src: "{{ ai_agents_config_dest }}/skills"
-    dest: "{{ ansible_env.HOME }}/.claude/skills"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.claude/skills"
   - src: "{{ ai_agents_config_dest }}/agents"
-    dest: "{{ ansible_env.HOME }}/.claude/agents"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.claude/agents"
   # Claude Code reads ~/.claude/CLAUDE.md as its global config — point it at the
   # config repo's AGENTS.md so there is one source of truth.
   - src: "{{ ai_agents_config_dest }}/AGENTS.md"
-    dest: "{{ ansible_env.HOME }}/.claude/CLAUDE.md"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.claude/CLAUDE.md"
   # AGY/Antigravity reads its Global Customizations Root at ~/.gemini/config/
   # (AGENTS.md + skills/ + agents/). Link into that dir — do not replace it; AGY
   # keeps its own mcp_config.json and projects/ there.
   - src: "{{ ai_agents_config_dest }}/AGENTS.md"
-    dest: "{{ ansible_env.HOME }}/.gemini/config/AGENTS.md"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/AGENTS.md"
   - src: "{{ ai_agents_config_dest }}/skills"
-    dest: "{{ ansible_env.HOME }}/.gemini/config/skills"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/skills"
   # Antigravity registers subagents from an agents/ directory, but does not
   # auto-discover ~/.claude/agents/. Expose the same personas under its config
   # root so the load-sdlc-agents skill has a stable path to read them — mirroring
   # how skills/ is exposed to both tools.
   - src: "{{ ai_agents_config_dest }}/agents"
-    dest: "{{ ansible_env.HOME }}/.gemini/config/agents"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/agents"

@@ -2,14 +2,14 @@
 # Verify each agent's binary is installed and its config is wired up.
 - name: Stat agy binary
   ansible.builtin.stat:
-    path: "{{ ansible_env.HOME }}/.local/bin/agy"
+    path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/agy"
   register: agy_bin
 - name: Assert agy is installed
   ansible.builtin.assert:
     that: agy_bin.stat.exists
 
 - name: Run agy --version
-  ansible.builtin.command: "{{ ansible_env.HOME }}/.local/bin/agy --version"
+  ansible.builtin.command: "{{ ansible_facts['env']['HOME'] }}/.local/bin/agy --version"
   register: agy_version
   changed_when: false
 - name: Assert agy version output
@@ -18,14 +18,14 @@
 
 - name: Stat claude binary
   ansible.builtin.stat:
-    path: "{{ ansible_env.HOME }}/.local/bin/claude"
+    path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/claude"
   register: claude_bin
 - name: Assert claude is installed
   ansible.builtin.assert:
     that: claude_bin.stat.exists
 
 - name: Run claude --version
-  ansible.builtin.command: "{{ ansible_env.HOME }}/.local/bin/claude --version"
+  ansible.builtin.command: "{{ ansible_facts['env']['HOME'] }}/.local/bin/claude --version"
   register: claude_version
   changed_when: false
 - name: Assert claude version output
@@ -34,14 +34,14 @@
 
 - name: Stat aider binary
   ansible.builtin.stat:
-    path: "{{ ansible_env.HOME }}/.local/bin/aider"
+    path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/aider"
   register: aider_bin
 - name: Assert aider is installed
   ansible.builtin.assert:
     that: aider_bin.stat.exists
 
 - name: Run aider --version
-  ansible.builtin.command: "{{ ansible_env.HOME }}/.local/bin/aider --version"
+  ansible.builtin.command: "{{ ansible_facts['env']['HOME'] }}/.local/bin/aider --version"
   register: aider_version
   changed_when: false
 - name: Assert aider version output
@@ -50,14 +50,14 @@
 
 - name: Stat codex binary
   ansible.builtin.stat:
-    path: "{{ ansible_env.HOME }}/.local/bin/codex"
+    path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/codex"
   register: codex_bin
 - name: Assert codex is installed
   ansible.builtin.assert:
     that: codex_bin.stat.exists
 
 - name: Run codex --version
-  ansible.builtin.command: "{{ ansible_env.HOME }}/.local/bin/codex --version"
+  ansible.builtin.command: "{{ ansible_facts['env']['HOME'] }}/.local/bin/codex --version"
   register: codex_version
   changed_when: false
 - name: Assert codex version output
@@ -66,7 +66,7 @@
 
 - name: Stat aider config file
   ansible.builtin.stat:
-    path: "{{ ansible_env.HOME }}/.aider.conf.yml"
+    path: "{{ ansible_facts['env']['HOME'] }}/.aider.conf.yml"
   register: aider_conf
 - name: Assert aider config file exists
   ansible.builtin.assert:

@@ -6,7 +6,7 @@
 
     - name: Stat agent config destination
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.config/agents"
+        path: "{{ ansible_facts['env']['HOME'] }}/.config/agents"
       register: config_dest
 
     - name: Assert agent config repo was cloned
@@ -26,7 +26,7 @@
 
     - name: Stat ~/.claude/skills symlink
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.claude/skills"
+        path: "{{ ansible_facts['env']['HOME'] }}/.claude/skills"
         follow: false
       register: claude_skills
 
@@ -37,7 +37,7 @@
 
     - name: Stat ~/.claude/agents symlink
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.claude/agents"
+        path: "{{ ansible_facts['env']['HOME'] }}/.claude/agents"
         follow: false
       register: claude_agents
 
@@ -48,7 +48,7 @@
 
     - name: Stat ~/.gemini/config/AGENTS.md symlink
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.gemini/config/AGENTS.md"
+        path: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/AGENTS.md"
         follow: false
       register: gemini_agents
 
@@ -59,7 +59,7 @@
 
     - name: Stat ~/.gemini/config/skills symlink
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.gemini/config/skills"
+        path: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/skills"
         follow: false
       register: gemini_skills
 
@@ -70,7 +70,7 @@
 
     - name: Stat ~/.gemini/config/agents symlink
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.gemini/config/agents"
+        path: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/agents"
         follow: false
       register: gemini_agents_dir
 
