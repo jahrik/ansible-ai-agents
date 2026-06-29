@@ -26,16 +26,27 @@ ai_agents_claude_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/claude"
 #   env      dict of environment variables (type: stdio)
 #
 # Secrets policy: never put a token in this file. The GitHub server below
-# authenticates over OAuth (browser prompt on first use), so no credential is
-# stored anywhere. To use a Personal Access Token with Claude Code instead, add
-# a header that references an env var — Claude Code expands ${VAR} at runtime:
-#   headers:
-#     Authorization: "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
-# AGY/Antigravity does not expand env vars, so leave it on OAuth there.
+# authenticates with a Personal Access Token taken from the
+# GITHUB_PERSONAL_ACCESS_TOKEN environment variable — Claude Code expands ${VAR}
+# in headers at runtime, so only the placeholder (never the token) is written to
+# ~/.claude.json. Export the token before launching Claude Code, e.g. from your
+# shell profile or a secrets manager:
+#   export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxx
+#
+# OAuth is intentionally NOT used here: GitHub's MCP auth server does not support
+# OAuth Dynamic Client Registration, which Claude Code requires, so the OAuth
+# flow fails with "Incompatible auth server: does not support dynamic client
+# registration". The PAT header is the working remote path.
+#
+# AGY/Antigravity does not expand env vars, so the placeholder will not resolve
+# there — configure GitHub auth in AGY by hand if you need it (never commit a
+# token).
 ai_agents_mcp_servers:
   - name: github
     type: http
     url: "https://api.githubcopilot.com/mcp/"
+    headers:
+      Authorization: "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
 
 # Config repo — override this with your own fork
 ai_agents_config_repo: "https://github.com/jahrik/agent-config"

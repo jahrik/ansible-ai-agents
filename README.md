@@ -16,8 +16,9 @@ symlinks it into each tool:
 
 It also registers shared **MCP (Model Context Protocol) servers** with the agents that
 support them — Claude Code (user scope, via `claude mcp add-json`) and AGY/Antigravity
-(`~/.gemini/config/mcp_config.json`). The GitHub server is wired up by default and
-authenticates over OAuth, so **no token is ever written to a file**.
+(`~/.gemini/config/mcp_config.json`). The GitHub server is wired up by default; it reads a
+Personal Access Token from the `GITHUB_PERSONAL_ACCESS_TOKEN` environment variable at
+runtime, so **no token is ever written to a file**.
 
 ## Requirements
 
@@ -49,6 +50,8 @@ ai_agents_mcp_servers:
   - name: github
     type: http
     url: "https://api.githubcopilot.com/mcp/"
+    headers:
+      Authorization: "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
   - name: my-local-server
     type: stdio
     command: npx
@@ -57,48 +60,43 @@ ai_agents_mcp_servers:
       SOME_FLAG: "1"
 ```
 
-**Never put a secret in this variable.** The default GitHub server uses OAuth (browser
-prompt on first use), so no credential is stored. To use a Personal Access Token with
-Claude Code instead, reference an env var in a header — Claude Code expands `${VAR}` at
-runtime (AGY does not, so leave it on OAuth):
+**Never put a secret in this variable.** The GitHub header references the
+`GITHUB_PERSONAL_ACCESS_TOKEN` environment variable; Claude Code expands `${VAR}` in
+headers at runtime, so only the placeholder — never the token — is written to
+`~/.claude.json`.
 
-```yaml
-- name: github
-  type: http
-  url: "https://api.githubcopilot.com/mcp/"
-  headers:
-    Authorization: "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
-```
+> **Why a token and not OAuth?** GitHub's MCP auth server does not support OAuth Dynamic
+> Client Registration, which Claude Code requires, so the OAuth flow fails with
+> `Incompatible auth server: does not support dynamic client registration`
+> ([claude-code#50092](https://github.com/anthropics/claude-code/issues/50092)). A
+> Personal Access Token is the working remote path.
 
 ### Authenticating the GitHub server
 
-The role registers the server, but the remote GitHub server needs a one-time OAuth
-login per machine (interactive, opens a browser). After running the role:
+The role registers the server; you supply the token via the environment.
 
 ```bash
-# 1. Confirm it is registered. "Failed to connect" just means "not yet authenticated".
-claude mcp list
-# github: https://api.githubcopilot.com/mcp/ (HTTP) - ✘ Failed to connect
+# 1. Create a GitHub Personal Access Token (fine-grained, scoped to the repos you want
+#    Claude to access): https://github.com/settings/personal-access-tokens
 
-# 2. Authenticate. In an interactive session, open the MCP menu, pick `github`,
-#    and choose Authenticate — this opens GitHub's OAuth page in your browser.
-claude
-/mcp
+# 2. Export it where your shell will pick it up (e.g. ~/.bashrc, or a secrets manager).
+#    Do NOT paste it into the playbook or any committed file.
+export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxx
 
-# 3. Verify.
+# 3. Start a fresh Claude Code session so it reads the variable, then verify.
 claude mcp list
 # github: https://api.githubcopilot.com/mcp/ (HTTP) - ✓ Connected
 ```
 
 Notes:
 
-- One-time per machine/user (user scope); the OAuth token persists across sessions and
-  is never written into `~/.claude.json`.
-- MCP tools load at session startup, so start a fresh `claude` session after
-  authenticating for the github tools to appear.
-- Re-running the role is idempotent and does not reset an existing authentication.
-- On a headless host with no browser, use the Personal Access Token header shown above
-  instead of OAuth.
+- The token is read from the environment at launch — restart `claude` after exporting it.
+  If the variable is unset, the server simply reports `Failed to connect`.
+- MCP tools load at session startup, so start a fresh `claude` session for the github
+  tools to appear.
+- Re-running the role is idempotent and does not overwrite an existing token.
+- **AGY/Antigravity** does not expand `${VAR}`, so the github entry it receives will not
+  authenticate; configure GitHub auth in AGY by hand if you need it (never commit a token).
 
 ## Bring Your Own Config Repo
 
