@@ -14,6 +14,11 @@ symlinks it into each tool:
 - **AGY/Antigravity** — `AGENTS.md` → `~/.gemini/config/AGENTS.md`, `skills/` → `~/.gemini/config/skills`, `agents/` → `~/.gemini/config/agents`
 - **Aider** — generates `~/.aider.conf.yml` to read `~/.config/agents/AGENTS.md`
 
+It also registers shared **MCP (Model Context Protocol) servers** with the agents that
+support them — Claude Code (user scope, via `claude mcp add-json`) and AGY/Antigravity
+(`~/.gemini/config/mcp_config.json`). The GitHub server is wired up by default and
+authenticates over OAuth, so **no token is ever written to a file**.
+
 ## Requirements
 
 - Ansible 2.16+
@@ -31,6 +36,39 @@ symlinks it into each tool:
 | `ai_agents_install.aider`       | `false`                                  | Install Aider CLI                               |
 | `ai_agents_install.codex`       | `false`                                  | Install Codex CLI                               |
 | `ai_agents_install.cursor`      | `false`                                  | Install Cursor — _planned, not yet implemented_ |
+| `ai_agents_mcp_servers`         | list (`github` on by default)            | MCP servers to wire into Claude Code + AGY      |
+
+## MCP Servers
+
+`ai_agents_mcp_servers` defines MCP servers to register with every enabled agent that
+supports them. Each entry is either a remote (`type: http`) or local (`type: stdio`)
+server:
+
+```yaml
+ai_agents_mcp_servers:
+  - name: github
+    type: http
+    url: "https://api.githubcopilot.com/mcp/"
+  - name: my-local-server
+    type: stdio
+    command: npx
+    args: ["-y", "@scope/some-mcp"]
+    env:
+      SOME_FLAG: "1"
+```
+
+**Never put a secret in this variable.** The default GitHub server uses OAuth (browser
+prompt on first use), so no credential is stored. To use a Personal Access Token with
+Claude Code instead, reference an env var in a header — Claude Code expands `${VAR}` at
+runtime (AGY does not, so leave it on OAuth):
+
+```yaml
+- name: github
+  type: http
+  url: "https://api.githubcopilot.com/mcp/"
+  headers:
+    Authorization: "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
+```
 
 ## Bring Your Own Config Repo
 

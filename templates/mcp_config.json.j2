@@ -1,0 +1,15 @@
+{# Managed by the ansible-ai-agents role. Merges ai_agents_mcp_servers into any
+   MCP servers AGY/Antigravity already has, so manual entries are preserved.
+   AGY uses `serverUrl` for remote servers and does NOT expand ${ENV} vars. #}
+{%- set ns = namespace(servers=ai_agents_agy_existing_servers | default({}, true)) -%}
+{%- for s in ai_agents_mcp_servers -%}
+{%-   if (s.type | default('stdio')) == 'http' -%}
+{%-     set blob = {'serverUrl': s.url} -%}
+{%-     if s.headers is defined -%}{%- set blob = blob | combine({'headers': s.headers}) -%}{%- endif -%}
+{%-   else -%}
+{%-     set blob = {'command': s.command, 'args': s.args | default([])} -%}
+{%-     if s.env is defined -%}{%- set blob = blob | combine({'env': s.env}) -%}{%- endif -%}
+{%-   endif -%}
+{%-   set ns.servers = ns.servers | combine({s.name: blob}) -%}
+{%- endfor -%}
+{{ {'mcpServers': ns.servers} | to_nice_json }}

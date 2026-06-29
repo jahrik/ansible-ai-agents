@@ -22,3 +22,6 @@
 
 - name: Create symlinks
   ansible.builtin.include_tasks: config/symlinks.yml
+
+- name: Configure MCP servers
+  ansible.builtin.include_tasks: config/mcp.yml

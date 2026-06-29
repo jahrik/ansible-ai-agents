@@ -7,6 +7,36 @@ ai_agents_install:
   codex: false
   cursor: false
 
+# Claude Code CLI path (installed by tasks/install/claude_code.yml) — used to
+# register MCP servers via `claude mcp add-json`.
+ai_agents_claude_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/claude"
+
+# MCP (Model Context Protocol) servers to wire into the installed agents.
+# Registered with Claude Code (user scope, in ~/.claude.json) and written into
+# AGY/Antigravity's ~/.gemini/config/mcp_config.json — only for whichever of
+# those agents is enabled in ai_agents_install above.
+#
+# Each entry:
+#   name     server name (required)
+#   type     'http' for a remote server, 'stdio' for a local command (default 'stdio')
+#   url      remote server URL          (type: http)
+#   headers  optional dict of request headers (type: http)
+#   command  executable to run          (type: stdio)
+#   args     list of arguments          (type: stdio)
+#   env      dict of environment variables (type: stdio)
+#
+# Secrets policy: never put a token in this file. The GitHub server below
+# authenticates over OAuth (browser prompt on first use), so no credential is
+# stored anywhere. To use a Personal Access Token with Claude Code instead, add
+# a header that references an env var — Claude Code expands ${VAR} at runtime:
+#   headers:
+#     Authorization: "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
+# AGY/Antigravity does not expand env vars, so leave it on OAuth there.
+ai_agents_mcp_servers:
+  - name: github
+    type: http
+    url: "https://api.githubcopilot.com/mcp/"
+
 # Config repo — override this with your own fork
 ai_agents_config_repo: "https://github.com/jahrik/agent-config"
 ai_agents_config_ref: "main"
