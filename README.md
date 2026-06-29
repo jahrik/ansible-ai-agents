@@ -70,6 +70,36 @@ runtime (AGY does not, so leave it on OAuth):
     Authorization: "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
 ```
 
+### Authenticating the GitHub server
+
+The role registers the server, but the remote GitHub server needs a one-time OAuth
+login per machine (interactive, opens a browser). After running the role:
+
+```bash
+# 1. Confirm it is registered. "Failed to connect" just means "not yet authenticated".
+claude mcp list
+# github: https://api.githubcopilot.com/mcp/ (HTTP) - ✘ Failed to connect
+
+# 2. Authenticate. In an interactive session, open the MCP menu, pick `github`,
+#    and choose Authenticate — this opens GitHub's OAuth page in your browser.
+claude
+/mcp
+
+# 3. Verify.
+claude mcp list
+# github: https://api.githubcopilot.com/mcp/ (HTTP) - ✓ Connected
+```
+
+Notes:
+
+- One-time per machine/user (user scope); the OAuth token persists across sessions and
+  is never written into `~/.claude.json`.
+- MCP tools load at session startup, so start a fresh `claude` session after
+  authenticating for the github tools to appear.
+- Re-running the role is idempotent and does not reset an existing authentication.
+- On a headless host with no browser, use the Personal Access Token header shown above
+  instead of OAuth.
+
 ## Bring Your Own Config Repo
 
 Point the role at your own fork of `agent-config`:
