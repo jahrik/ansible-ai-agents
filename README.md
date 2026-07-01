@@ -14,23 +14,80 @@ symlinks it into each tool:
 - **AGY/Antigravity** — `AGENTS.md` → `~/.gemini/config/AGENTS.md`, `skills/` → `~/.gemini/config/skills`, `agents/` → `~/.gemini/config/agents`
 - **Aider** — generates `~/.aider.conf.yml` to read `~/.config/agents/AGENTS.md`
 
+It also registers shared **MCP (Model Context Protocol) servers** with the agents that
+support them — Claude Code (user scope, via `claude mcp add-json`) and AGY/Antigravity
+(`~/.gemini/config/mcp_config.json`). The default is a **`github`** server from the
+[`mcp-servers`](https://github.com/jahrik/mcp-servers) package; it shells out to the `gh`
+CLI, so it **reuses your existing `gh auth login` session — no token, no secret in any
+file**. See [MCP Servers](#mcp-servers).
+
 ## Requirements
 
 - Ansible 2.16+
 - `git` on target host (to clone the agent-config repo)
+- For the default `github` MCP server: the [`gh` CLI](https://cli.github.com/) installed and
+  authenticated (`gh auth login`). The role installs the server but can't run the
+  interactive login.
 
 ## Role Variables
 
-| Variable                        | Default                                  | Description                                     |
-| ------------------------------- | ---------------------------------------- | ----------------------------------------------- |
-| `ai_agents_config_repo`         | `https://github.com/jahrik/agent-config` | Git URL of your agent config repo               |
-| `ai_agents_config_ref`          | `main`                                   | Branch or tag to check out                      |
-| `ai_agents_config_dest`         | `~/.config/agents`                       | Where the config repo is cloned                 |
-| `ai_agents_install.agy`         | `true`                                   | Install AGY (Antigravity CLI)                   |
-| `ai_agents_install.claude_code` | `true`                                   | Install Claude Code CLI                         |
-| `ai_agents_install.aider`       | `false`                                  | Install Aider CLI                               |
-| `ai_agents_install.codex`       | `false`                                  | Install Codex CLI                               |
-| `ai_agents_install.cursor`      | `false`                                  | Install Cursor — _planned, not yet implemented_ |
+| Variable                        | Default                                     | Description                                     |
+| ------------------------------- | ------------------------------------------- | ----------------------------------------------- |
+| `ai_agents_config_repo`         | `https://github.com/jahrik/agent-config`    | Git URL of your agent config repo               |
+| `ai_agents_config_ref`          | `main`                                      | Branch or tag to check out                      |
+| `ai_agents_config_dest`         | `~/.config/agents`                          | Where the config repo is cloned                 |
+| `ai_agents_install.agy`         | `true`                                      | Install AGY (Antigravity CLI)                   |
+| `ai_agents_install.claude_code` | `true`                                      | Install Claude Code CLI                         |
+| `ai_agents_install.aider`       | `false`                                     | Install Aider CLI                               |
+| `ai_agents_install.codex`       | `false`                                     | Install Codex CLI                               |
+| `ai_agents_install.cursor`      | `false`                                     | Install Cursor — _planned, not yet implemented_ |
+| `ai_agents_mcp_servers`         | list (`github` on by default)               | MCP servers to wire into Claude Code + AGY      |
+| `ai_agents_mcp_servers_install` | `true`                                      | Install the `mcp-servers` package (`uv tool`)   |
+| `ai_agents_mcp_servers_source`  | `git+https://github.com/jahrik/mcp-servers` | Source `uv tool install` pulls the package from |
+
+## MCP Servers
+
+`ai_agents_mcp_servers` defines MCP servers to register with every enabled agent that
+supports them. Each entry is either a local (`type: stdio`) or remote (`type: http`)
+server. The default is **`github`**, from the
+[`mcp-servers`](https://github.com/jahrik/mcp-servers) package — a local stdio server that
+shells out to the `gh` CLI, so it reuses your existing `gh auth login` session with **no
+token and no secret in any file**:
+
+```yaml
+ai_agents_mcp_servers:
+  - name: github
+    type: stdio
+    command: "{{ ai_agents_mcp_github_bin }}" # ~/.local/bin/mcp-github
+    args: []
+```
+
+The role installs the package with `uv tool install` (bootstrapping `uv` if needed); set
+`ai_agents_mcp_servers_install: false` to skip that. **Prerequisite:** the `gh` CLI must be
+installed and authenticated (`gh auth login`) for the server to connect — the role
+registers it either way, so it simply reports `Failed to connect` until `gh` is set up.
+
+### Adding other servers
+
+Add remote (`type: http`) or local (`type: stdio`) entries to the list:
+
+```yaml
+ai_agents_mcp_servers:
+  - name: context7 # keyless docs server
+    type: http
+    url: "https://mcp.context7.com/mcp"
+  - name: my-local-server
+    type: stdio
+    command: npx
+    args: ["-y", "@scope/some-mcp"]
+```
+
+**Never put a secret in this variable.** For servers that need a credential, reference an
+environment variable — Claude Code expands `${VAR}` in urls, headers, and env values at
+runtime, so only the placeholder (never the secret) is written to `~/.claude.json`.
+
+> **AGY/Antigravity does not expand `${VAR}`.** A secret-bearing server won't authenticate
+> there — configure those by hand in AGY if you need them (never commit a token).
 
 ## Bring Your Own Config Repo
 

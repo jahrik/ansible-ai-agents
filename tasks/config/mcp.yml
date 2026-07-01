@@ -1,0 +1,98 @@
+---
+# Wire MCP (Model Context Protocol) servers into the installed agents.
+# Server definitions come from ai_agents_mcp_servers in defaults/main.yml.
+
+- name: Register MCP servers with Claude Code
+  when:
+    - ai_agents_install['claude_code'] | bool
+    - ai_agents_mcp_servers | length > 0
+  block:
+    # Read the current config to know which servers already exist, rather than
+    # `claude mcp list` — that runs a network health check on each server.
+    - name: Read existing Claude Code config
+      ansible.builtin.slurp:
+        src: "{{ ansible_facts['env']['HOME'] }}/.claude.json"
+      register: ai_agents_claude_config_raw
+      failed_when: false
+
+    - name: Determine MCP servers already registered with Claude Code
+      ansible.builtin.set_fact:
+        ai_agents_claude_mcp_existing: >-
+          {{ ((ai_agents_claude_config_raw.content | b64decode | from_json).mcpServers | default({}))
+             if (ai_agents_claude_config_raw.content is defined
+                 and (ai_agents_claude_config_raw.content | b64decode | trim) != '')
+             else {} }}
+
+    # add-json refuses to overwrite an existing server, so a server whose
+    # definition has drifted (combining the desired blob into the stored one
+    # would change it) is removed first, then re-registered below. Servers that
+    # already match are left untouched, keeping the run idempotent.
+    - name: Remove drifted MCP servers from Claude Code (user scope)
+      vars:
+        desired_blob: &desired_blob >-
+          {{ ({'type': 'http', 'url': item.url}
+              | combine({'headers': item.headers} if item.headers is defined else {}))
+             if (item.type | default('stdio')) == 'http'
+             else ({'command': item.command, 'args': item.args | default([])}
+                   | combine({'env': item.env} if item.env is defined else {})) }}
+      ansible.builtin.command:
+        argv: ["{{ ai_agents_claude_bin }}", mcp, remove, "{{ item.name }}", --scope, user]
+      loop: "{{ ai_agents_mcp_servers }}"
+      loop_control:
+        label: "{{ item.name }}"
+      when:
+        - item.name in ai_agents_claude_mcp_existing
+        - (ai_agents_claude_mcp_existing[item.name] | combine(desired_blob)) != ai_agents_claude_mcp_existing[item.name]
+      changed_when: true
+
+    - name: Register MCP servers with Claude Code (user scope)
+      vars:
+        desired_blob: *desired_blob
+      ansible.builtin.command:
+        argv:
+          - "{{ ai_agents_claude_bin }}"
+          - mcp
+          - add-json
+          - --scope
+          - user
+          - "{{ item.name }}"
+          - "{{ desired_blob | to_json }}"
+      loop: "{{ ai_agents_mcp_servers }}"
+      loop_control:
+        label: "{{ item.name }}"
+      when: >-
+        item.name not in ai_agents_claude_mcp_existing
+        or (ai_agents_claude_mcp_existing[item.name] | combine(desired_blob)) != ai_agents_claude_mcp_existing[item.name]
+      changed_when: true
+
+- name: Configure MCP servers for AGY/Antigravity
+  when:
+    - ai_agents_install['agy'] | bool
+    - ai_agents_mcp_servers | length > 0
+  block:
+    - name: Ensure AGY config directory exists
+      ansible.builtin.file:
+        path: "{{ ansible_facts['env']['HOME'] }}/.gemini/config"
+        state: directory
+        mode: "0755"
+
+    - name: Read existing AGY MCP config
+      ansible.builtin.slurp:
+        src: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/mcp_config.json"
+      register: ai_agents_agy_mcp_raw
+      failed_when: false
+
+    # Preserve any servers AGY already has; the template merges ours on top.
+    - name: Determine MCP servers already configured for AGY
+      ansible.builtin.set_fact:
+        ai_agents_agy_existing_servers: >-
+          {{ (ai_agents_agy_mcp_raw.content | b64decode | from_json).mcpServers | default({})
+             if (ai_agents_agy_mcp_raw.content is defined
+                 and (ai_agents_agy_mcp_raw.content | b64decode | trim) != '')
+             else {} }}
+
+    - name: Write AGY MCP config
+      ansible.builtin.template:
+        src: mcp_config.json.j2
+        dest: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/mcp_config.json"
+        mode: "0644"

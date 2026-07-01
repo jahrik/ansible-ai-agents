@@ -1,0 +1,58 @@
+---
+# Install the mcp-servers package, which provides the default `github` MCP
+# server (console script mcp-github) and any future servers. Installed with
+# `uv tool install`; uv is bootstrapped into ~/.local/bin if it is missing.
+
+- name: Check whether uv is installed
+  ansible.builtin.stat:
+    path: "{{ ai_agents_uv_bin }}"
+  register: ai_agents_uv_binary
+
+- name: Bootstrap uv
+  when: not ai_agents_uv_binary.stat.exists
+  block:
+    - name: Create a private temp directory for the uv installer
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: uv-install
+      register: ai_agents_uv_tmp
+
+    - name: Download the uv installer script
+      ansible.builtin.get_url:
+        url: https://astral.sh/uv/install.sh
+        dest: "{{ ai_agents_uv_tmp.path }}/install.sh"
+        mode: "0700"
+
+    - name: Run the uv installer script
+      ansible.builtin.command:
+        cmd: "{{ ai_agents_uv_tmp.path }}/install.sh"
+      args:
+        creates: "{{ ai_agents_uv_bin }}"
+
+    - name: Remove the uv installer temp directory
+      ansible.builtin.file:
+        path: "{{ ai_agents_uv_tmp.path }}"
+        state: absent
+
+- name: Install the mcp-servers package
+  ansible.builtin.command:
+    cmd: "{{ ai_agents_uv_bin }} tool install --force {{ ai_agents_mcp_servers_source }}"
+  args:
+    creates: "{{ ai_agents_mcp_github_bin }}"
+
+# The github server shells out to `gh`; it can only connect once `gh` is
+# installed and `gh auth login` has been run. The role can't do the interactive
+# login, so just surface a clear heads-up if gh is absent — registration still
+# succeeds; the server simply won't connect until gh is set up.
+- name: Check for the GitHub CLI
+  ansible.builtin.command: gh --version
+  register: ai_agents_gh_check
+  changed_when: false
+  failed_when: false
+
+- name: Warn if the GitHub CLI is not available
+  ansible.builtin.debug:
+    msg: >-
+      The `gh` CLI was not found on PATH. The default `github` MCP server needs
+      it — install gh and run `gh auth login` for the server to connect.
+  when: ai_agents_gh_check.rc != 0
