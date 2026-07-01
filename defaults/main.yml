@@ -16,6 +16,8 @@ ai_agents_claude_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/claude"
 # into ~/.local/bin if missing. Set false to install the package yourself.
 ai_agents_mcp_servers_install: true
 ai_agents_mcp_servers_source: "git+https://github.com/jahrik/mcp-servers"
+# Install is once-only; set true to force a reinstall and pull the latest commit.
+ai_agents_mcp_servers_upgrade: false
 ai_agents_uv_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/uv"
 ai_agents_mcp_github_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-github"
 

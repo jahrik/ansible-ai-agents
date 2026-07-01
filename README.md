@@ -31,19 +31,20 @@ file**. See [MCP Servers](#mcp-servers).
 
 ## Role Variables
 
-| Variable                        | Default                                     | Description                                     |
-| ------------------------------- | ------------------------------------------- | ----------------------------------------------- |
-| `ai_agents_config_repo`         | `https://github.com/jahrik/agent-config`    | Git URL of your agent config repo               |
-| `ai_agents_config_ref`          | `main`                                      | Branch or tag to check out                      |
-| `ai_agents_config_dest`         | `~/.config/agents`                          | Where the config repo is cloned                 |
-| `ai_agents_install.agy`         | `true`                                      | Install AGY (Antigravity CLI)                   |
-| `ai_agents_install.claude_code` | `true`                                      | Install Claude Code CLI                         |
-| `ai_agents_install.aider`       | `false`                                     | Install Aider CLI                               |
-| `ai_agents_install.codex`       | `false`                                     | Install Codex CLI                               |
-| `ai_agents_install.cursor`      | `false`                                     | Install Cursor — _planned, not yet implemented_ |
-| `ai_agents_mcp_servers`         | list (`github` on by default)               | MCP servers to wire into Claude Code + AGY      |
-| `ai_agents_mcp_servers_install` | `true`                                      | Install the `mcp-servers` package (`uv tool`)   |
-| `ai_agents_mcp_servers_source`  | `git+https://github.com/jahrik/mcp-servers` | Source `uv tool install` pulls the package from |
+| Variable                        | Default                                     | Description                                                                              |
+| ------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `ai_agents_config_repo`         | `https://github.com/jahrik/agent-config`    | Git URL of your agent config repo                                                        |
+| `ai_agents_config_ref`          | `main`                                      | Branch or tag to check out                                                               |
+| `ai_agents_config_dest`         | `~/.config/agents`                          | Where the config repo is cloned                                                          |
+| `ai_agents_install.agy`         | `true`                                      | Install AGY (Antigravity CLI)                                                            |
+| `ai_agents_install.claude_code` | `true`                                      | Install Claude Code CLI                                                                  |
+| `ai_agents_install.aider`       | `false`                                     | Install Aider CLI                                                                        |
+| `ai_agents_install.codex`       | `false`                                     | Install Codex CLI                                                                        |
+| `ai_agents_install.cursor`      | `false`                                     | Install Cursor — _planned, not yet implemented_                                          |
+| `ai_agents_mcp_servers`         | list (`github` on by default)               | MCP servers to wire into Claude Code + AGY                                               |
+| `ai_agents_mcp_servers_install` | `true`                                      | Install the `mcp-servers` package (`uv tool`)                                            |
+| `ai_agents_mcp_servers_source`  | `git+https://github.com/jahrik/mcp-servers` | Source `uv tool install` pulls the package from                                          |
+| `ai_agents_mcp_servers_upgrade` | `false`                                     | Force-reinstall `mcp-servers` to pull the latest commit (install is otherwise once-only) |
 
 ## MCP Servers
 
