@@ -11,40 +11,26 @@ ai_agents_install:
 # register MCP servers via `claude mcp add-json`.
 ai_agents_claude_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/claude"
 
-# MCP (Model Context Protocol) servers to wire into the installed agents.
-# Registered with Claude Code (user scope, in ~/.claude.json) and written into
-# AGY/Antigravity's ~/.gemini/config/mcp_config.json — only for whichever of
-# those agents is enabled in ai_agents_install above.
+# The mcp-servers package (https://github.com/jahrik/mcp-servers) provides the
+# default `github` server. Installed with `uv tool install`; uv is bootstrapped
+# into ~/.local/bin if missing. Set false to install the package yourself.
+ai_agents_mcp_servers_install: true
+ai_agents_mcp_servers_source: "git+https://github.com/jahrik/mcp-servers"
+ai_agents_uv_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/uv"
+ai_agents_mcp_github_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-github"
+
+# MCP servers to register with the enabled agents (Claude Code + AGY). Entries
+# are 'stdio' (command/args/env) or 'http' (url/headers). Never put a secret
+# here — reference an env var; Claude Code expands ${VAR} at runtime.
 #
-# Each entry:
-#   name     server name (required)
-#   type     'http' for a remote server, 'stdio' for a local command (default 'stdio')
-#   url      remote server URL          (type: http)
-#   headers  optional dict of request headers (type: http)
-#   command  executable to run          (type: stdio)
-#   args     list of arguments          (type: stdio)
-#   env      dict of environment variables (type: stdio)
-#
-# The default server, Context7 (https://context7.com), fetches up-to-date,
-# version-specific library documentation into the agent's context. It is keyless
-# for basic use — no token, no Docker — so it works out of the box. For higher
-# rate limits, add a CONTEXT7_API_KEY header referencing an env var (see below).
-#
-# Secrets policy: never put a token in this file. Reference credentials through
-# an environment variable instead — Claude Code expands ${VAR} in urls, headers,
-# and env values at runtime, so only the placeholder (never the secret) is
-# written to ~/.claude.json. AGY/Antigravity does NOT expand env vars, so any
-# server that needs a secret will not authenticate there; configure those by
-# hand in AGY if you need them (never commit a token).
-#
-# The GitHub MCP server is intentionally NOT a default: every variant requires a
-# Personal Access Token (OAuth fails Claude Code's Dynamic Client Registration
-# requirement), so it would sit unconnected until a token is exported. See the
-# README "MCP Servers" section for a copy-paste opt-in entry.
+# The default `github` server shells out to `gh`, reusing your `gh auth login`
+# session (no token). Requires the gh CLI installed and authenticated. See the
+# README "MCP Servers" section.
 ai_agents_mcp_servers:
-  - name: context7
-    type: http
-    url: "https://mcp.context7.com/mcp"
+  - name: github
+    type: stdio
+    command: "{{ ai_agents_mcp_github_bin }}"
+    args: []
 
 # Config repo — override this with your own fork
 ai_agents_config_repo: "https://github.com/jahrik/agent-config"

@@ -77,19 +77,28 @@
   ansible.builtin.slurp:
     src: "{{ ansible_facts['env']['HOME'] }}/.claude.json"
   register: claude_config
-- name: Assert context7 MCP server registered with Claude Code
+- name: Assert github MCP server registered with Claude Code
   ansible.builtin.assert:
     that:
-      - "'context7' in (claude_config.content | b64decode | from_json).mcpServers"
-    fail_msg: "context7 MCP server was not registered with Claude Code"
+      - "'github' in (claude_config.content | b64decode | from_json).mcpServers"
+    fail_msg: "github MCP server was not registered with Claude Code"
 
 - name: Read AGY MCP config
   ansible.builtin.slurp:
     src: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/mcp_config.json"
   register: agy_mcp_config
-- name: Assert context7 MCP server configured for AGY with a serverUrl
+- name: Assert github MCP server configured for AGY with a command
   ansible.builtin.assert:
     that:
-      - "'context7' in (agy_mcp_config.content | b64decode | from_json).mcpServers"
-      - "(agy_mcp_config.content | b64decode | from_json).mcpServers.context7.serverUrl is defined"
-    fail_msg: "context7 MCP server was not configured for AGY"
+      - "'github' in (agy_mcp_config.content | b64decode | from_json).mcpServers"
+      - "(agy_mcp_config.content | b64decode | from_json).mcpServers.github.command is defined"
+    fail_msg: "github MCP server was not configured for AGY"
+
+- name: Stat mcp-github binary
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-github"
+  register: mcp_github_bin
+- name: Assert mcp-github server binary is installed
+  ansible.builtin.assert:
+    that: mcp_github_bin.stat.exists
+    fail_msg: "mcp-github binary from the mcp-servers package was not installed"

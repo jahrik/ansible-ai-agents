@@ -15,7 +15,7 @@ Installs and configures AI coding agents across OS environments. See `README.md`
 | `ai_agents_config_dest` | `~/.config/agents`                       | Clone destination for the config repo        |
 | `ai_agents_install`     | dict (`agy`/`claude_code` on by default) | Per-agent install toggles                    |
 | `ai_agents_symlinks`    | list                                     | `src`→`dest` links from config repo to tools |
-| `ai_agents_mcp_servers` | list (`context7` on by default)          | MCP servers wired into Claude Code + AGY     |
+| `ai_agents_mcp_servers` | list (`github` on by default)            | MCP servers wired into Claude Code + AGY     |
 
 ## Key Files
 
@@ -24,6 +24,7 @@ Installs and configures AI coding agents across OS environments. See `README.md`
 - `tasks/install/<agent>.yml` — one file per agent
 - `tasks/config/clone.yml` — clones the agent config repo
 - `tasks/config/symlinks.yml` — wires config repo into tool-expected locations
+- `tasks/config/mcp_servers.yml` — installs the `mcp-servers` package (via `uv tool`)
 - `tasks/config/mcp.yml` — registers MCP servers (Claude Code via CLI, AGY via JSON)
 - `templates/mcp_config.json.j2` — renders/merges AGY's `mcp_config.json`
 - `molecule/default/` — test scenario (converge + verify)

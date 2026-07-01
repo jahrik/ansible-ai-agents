@@ -23,5 +23,9 @@
 - name: Create symlinks
   ansible.builtin.include_tasks: config/symlinks.yml
 
+- name: Install MCP servers package
+  ansible.builtin.include_tasks: config/mcp_servers.yml
+  when: ai_agents_mcp_servers_install | bool
+
 - name: Configure MCP servers
   ansible.builtin.include_tasks: config/mcp.yml

@@ -16,100 +16,78 @@ symlinks it into each tool:
 
 It also registers shared **MCP (Model Context Protocol) servers** with the agents that
 support them — Claude Code (user scope, via `claude mcp add-json`) and AGY/Antigravity
-(`~/.gemini/config/mcp_config.json`). The **Context7** documentation server is wired up by
-default; it's keyless and remote, so it works out of the box with **no token and no Docker**.
-Additional servers (including GitHub) are opt-in — see [MCP Servers](#mcp-servers).
+(`~/.gemini/config/mcp_config.json`). The default is a **`github`** server from the
+[`mcp-servers`](https://github.com/jahrik/mcp-servers) package; it shells out to the `gh`
+CLI, so it **reuses your existing `gh auth login` session — no token, no secret in any
+file**. See [MCP Servers](#mcp-servers).
 
 ## Requirements
 
 - Ansible 2.16+
 - `git` on target host (to clone the agent-config repo)
+- For the default `github` MCP server: the [`gh` CLI](https://cli.github.com/) installed and
+  authenticated (`gh auth login`). The role installs the server but can't run the
+  interactive login.
 
 ## Role Variables
 
-| Variable                        | Default                                  | Description                                     |
-| ------------------------------- | ---------------------------------------- | ----------------------------------------------- |
-| `ai_agents_config_repo`         | `https://github.com/jahrik/agent-config` | Git URL of your agent config repo               |
-| `ai_agents_config_ref`          | `main`                                   | Branch or tag to check out                      |
-| `ai_agents_config_dest`         | `~/.config/agents`                       | Where the config repo is cloned                 |
-| `ai_agents_install.agy`         | `true`                                   | Install AGY (Antigravity CLI)                   |
-| `ai_agents_install.claude_code` | `true`                                   | Install Claude Code CLI                         |
-| `ai_agents_install.aider`       | `false`                                  | Install Aider CLI                               |
-| `ai_agents_install.codex`       | `false`                                  | Install Codex CLI                               |
-| `ai_agents_install.cursor`      | `false`                                  | Install Cursor — _planned, not yet implemented_ |
-| `ai_agents_mcp_servers`         | list (`context7` on by default)          | MCP servers to wire into Claude Code + AGY      |
+| Variable                        | Default                                     | Description                                     |
+| ------------------------------- | ------------------------------------------- | ----------------------------------------------- |
+| `ai_agents_config_repo`         | `https://github.com/jahrik/agent-config`    | Git URL of your agent config repo               |
+| `ai_agents_config_ref`          | `main`                                      | Branch or tag to check out                      |
+| `ai_agents_config_dest`         | `~/.config/agents`                          | Where the config repo is cloned                 |
+| `ai_agents_install.agy`         | `true`                                      | Install AGY (Antigravity CLI)                   |
+| `ai_agents_install.claude_code` | `true`                                      | Install Claude Code CLI                         |
+| `ai_agents_install.aider`       | `false`                                     | Install Aider CLI                               |
+| `ai_agents_install.codex`       | `false`                                     | Install Codex CLI                               |
+| `ai_agents_install.cursor`      | `false`                                     | Install Cursor — _planned, not yet implemented_ |
+| `ai_agents_mcp_servers`         | list (`github` on by default)               | MCP servers to wire into Claude Code + AGY      |
+| `ai_agents_mcp_servers_install` | `true`                                      | Install the `mcp-servers` package (`uv tool`)   |
+| `ai_agents_mcp_servers_source`  | `git+https://github.com/jahrik/mcp-servers` | Source `uv tool install` pulls the package from |
 
 ## MCP Servers
 
 `ai_agents_mcp_servers` defines MCP servers to register with every enabled agent that
-supports them. Each entry is either a remote (`type: http`) or local (`type: stdio`)
-server. The default is [Context7](https://context7.com), a keyless documentation server
-that fetches up-to-date, version-specific library docs into the agent's context:
+supports them. Each entry is either a local (`type: stdio`) or remote (`type: http`)
+server. The default is **`github`**, from the
+[`mcp-servers`](https://github.com/jahrik/mcp-servers) package — a local stdio server that
+shells out to the `gh` CLI, so it reuses your existing `gh auth login` session with **no
+token and no secret in any file**:
 
 ```yaml
 ai_agents_mcp_servers:
-  - name: context7
+  - name: github
+    type: stdio
+    command: "{{ ai_agents_mcp_github_bin }}" # ~/.local/bin/mcp-github
+    args: []
+```
+
+The role installs the package with `uv tool install` (bootstrapping `uv` if needed); set
+`ai_agents_mcp_servers_install: false` to skip that. **Prerequisite:** the `gh` CLI must be
+installed and authenticated (`gh auth login`) for the server to connect — the role
+registers it either way, so it simply reports `Failed to connect` until `gh` is set up.
+
+### Adding other servers
+
+Add remote (`type: http`) or local (`type: stdio`) entries to the list:
+
+```yaml
+ai_agents_mcp_servers:
+  - name: context7 # keyless docs server
     type: http
     url: "https://mcp.context7.com/mcp"
-  # A local (stdio) server example:
   - name: my-local-server
     type: stdio
     command: npx
     args: ["-y", "@scope/some-mcp"]
-    env:
-      SOME_FLAG: "1"
 ```
 
-**Never put a secret in this variable.** Reference credentials through an environment
-variable instead — Claude Code expands `${VAR}` in urls, headers, and env values at
+**Never put a secret in this variable.** For servers that need a credential, reference an
+environment variable — Claude Code expands `${VAR}` in urls, headers, and env values at
 runtime, so only the placeholder (never the secret) is written to `~/.claude.json`.
-Context7 needs no credential; for higher rate limits add a header referencing an env var:
 
-```yaml
-headers:
-  CONTEXT7_API_KEY: "${CONTEXT7_API_KEY}"
-```
-
-> **AGY/Antigravity does not expand `${VAR}`.** Any server that needs a secret will not
-> authenticate there — configure those by hand in AGY if you need them (never commit a
-> token). Keyless servers like Context7 work in both tools.
-
-### Adding the GitHub server (opt-in)
-
-The GitHub MCP server is **not** a default because every variant requires a Personal
-Access Token — OAuth fails Claude Code's Dynamic Client Registration requirement
-(`Incompatible auth server: does not support dynamic client registration`,
-[claude-code#52638](https://github.com/anthropics/claude-code/issues/52638)), and the
-local Docker/binary servers only accept a PAT
-([github-mcp-server#600](https://github.com/github/github-mcp-server/issues/600)). Add it
-to `ai_agents_mcp_servers` yourself if you want it:
-
-```yaml
-- name: github
-  type: http
-  url: "https://api.githubcopilot.com/mcp/"
-  headers:
-    Authorization: "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
-```
-
-Then supply the token via the environment:
-
-```bash
-# 1. Create a GitHub Personal Access Token (fine-grained, scoped to the repos you want
-#    the agent to access): https://github.com/settings/personal-access-tokens
-
-# 2. Export it where your shell will pick it up (e.g. ~/.bashrc, or a secrets manager).
-#    Do NOT paste it into the playbook or any committed file.
-export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxx
-
-# 3. Start a fresh Claude Code session so it reads the variable, then verify.
-claude mcp list
-# github: https://api.githubcopilot.com/mcp/ (HTTP) - ✓ Connected
-```
-
-The token is read from the environment at launch — restart `claude` after exporting it.
-If the variable is unset, the server simply reports `Failed to connect`. Re-running the
-role is idempotent and does not overwrite existing servers.
+> **AGY/Antigravity does not expand `${VAR}`.** A secret-bearing server won't authenticate
+> there — configure those by hand in AGY if you need them (never commit a token).
 
 ## Bring Your Own Config Repo
 
