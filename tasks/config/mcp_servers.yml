@@ -40,6 +40,17 @@
   args:
     creates: "{{ ai_agents_mcp_github_bin }}"
 
+# Opt-in force-reinstall to pull the latest commit (the install above is
+# once-only). uv prints "Installed" only when it actually reinstalls.
+- name: Upgrade the mcp-servers package to the latest source ref
+  ansible.builtin.command:
+    cmd: "{{ ai_agents_uv_bin }} tool install --force {{ ai_agents_mcp_servers_source }}"
+  register: ai_agents_mcp_upgrade
+  changed_when: >-
+    'Installed' in (ai_agents_mcp_upgrade.stdout | default(''))
+    or 'Installed' in (ai_agents_mcp_upgrade.stderr | default(''))
+  when: ai_agents_mcp_servers_upgrade | bool
+
 # The github server shells out to `gh`; it can only connect once `gh` is
 # installed and `gh auth login` has been run. The role can't do the interactive
 # login, so just surface a clear heads-up if gh is absent — registration still
