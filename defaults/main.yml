@@ -25,28 +25,26 @@ ai_agents_claude_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/claude"
 #   args     list of arguments          (type: stdio)
 #   env      dict of environment variables (type: stdio)
 #
-# Secrets policy: never put a token in this file. The GitHub server below
-# authenticates with a Personal Access Token taken from the
-# GITHUB_PERSONAL_ACCESS_TOKEN environment variable — Claude Code expands ${VAR}
-# in headers at runtime, so only the placeholder (never the token) is written to
-# ~/.claude.json. Export the token before launching Claude Code, e.g. from your
-# shell profile or a secrets manager:
-#   export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_xxx
+# The default server, Context7 (https://context7.com), fetches up-to-date,
+# version-specific library documentation into the agent's context. It is keyless
+# for basic use — no token, no Docker — so it works out of the box. For higher
+# rate limits, add a CONTEXT7_API_KEY header referencing an env var (see below).
 #
-# OAuth is intentionally NOT used here: GitHub's MCP auth server does not support
-# OAuth Dynamic Client Registration, which Claude Code requires, so the OAuth
-# flow fails with "Incompatible auth server: does not support dynamic client
-# registration". The PAT header is the working remote path.
+# Secrets policy: never put a token in this file. Reference credentials through
+# an environment variable instead — Claude Code expands ${VAR} in urls, headers,
+# and env values at runtime, so only the placeholder (never the secret) is
+# written to ~/.claude.json. AGY/Antigravity does NOT expand env vars, so any
+# server that needs a secret will not authenticate there; configure those by
+# hand in AGY if you need them (never commit a token).
 #
-# AGY/Antigravity does not expand env vars, so the placeholder will not resolve
-# there — configure GitHub auth in AGY by hand if you need it (never commit a
-# token).
+# The GitHub MCP server is intentionally NOT a default: every variant requires a
+# Personal Access Token (OAuth fails Claude Code's Dynamic Client Registration
+# requirement), so it would sit unconnected until a token is exported. See the
+# README "MCP Servers" section for a copy-paste opt-in entry.
 ai_agents_mcp_servers:
-  - name: github
+  - name: context7
     type: http
-    url: "https://api.githubcopilot.com/mcp/"
-    headers:
-      Authorization: "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
+    url: "https://mcp.context7.com/mcp"
 
 # Config repo — override this with your own fork
 ai_agents_config_repo: "https://github.com/jahrik/agent-config"

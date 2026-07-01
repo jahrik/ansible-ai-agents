@@ -15,7 +15,7 @@ Installs and configures AI coding agents across OS environments. See `README.md`
 | `ai_agents_config_dest` | `~/.config/agents`                       | Clone destination for the config repo        |
 | `ai_agents_install`     | dict (`agy`/`claude_code` on by default) | Per-agent install toggles                    |
 | `ai_agents_symlinks`    | list                                     | `src`→`dest` links from config repo to tools |
-| `ai_agents_mcp_servers` | list (`github` on by default)            | MCP servers wired into Claude Code + AGY     |
+| `ai_agents_mcp_servers` | list (`context7` on by default)          | MCP servers wired into Claude Code + AGY     |
 
 ## Key Files
 

@@ -16,9 +16,9 @@ symlinks it into each tool:
 
 It also registers shared **MCP (Model Context Protocol) servers** with the agents that
 support them — Claude Code (user scope, via `claude mcp add-json`) and AGY/Antigravity
-(`~/.gemini/config/mcp_config.json`). The GitHub server is wired up by default; it reads a
-Personal Access Token from the `GITHUB_PERSONAL_ACCESS_TOKEN` environment variable at
-runtime, so **no token is ever written to a file**.
+(`~/.gemini/config/mcp_config.json`). The **Context7** documentation server is wired up by
+default; it's keyless and remote, so it works out of the box with **no token and no Docker**.
+Additional servers (including GitHub) are opt-in — see [MCP Servers](#mcp-servers).
 
 ## Requirements
 
@@ -37,21 +37,21 @@ runtime, so **no token is ever written to a file**.
 | `ai_agents_install.aider`       | `false`                                  | Install Aider CLI                               |
 | `ai_agents_install.codex`       | `false`                                  | Install Codex CLI                               |
 | `ai_agents_install.cursor`      | `false`                                  | Install Cursor — _planned, not yet implemented_ |
-| `ai_agents_mcp_servers`         | list (`github` on by default)            | MCP servers to wire into Claude Code + AGY      |
+| `ai_agents_mcp_servers`         | list (`context7` on by default)          | MCP servers to wire into Claude Code + AGY      |
 
 ## MCP Servers
 
 `ai_agents_mcp_servers` defines MCP servers to register with every enabled agent that
 supports them. Each entry is either a remote (`type: http`) or local (`type: stdio`)
-server:
+server. The default is [Context7](https://context7.com), a keyless documentation server
+that fetches up-to-date, version-specific library docs into the agent's context:
 
 ```yaml
 ai_agents_mcp_servers:
-  - name: github
+  - name: context7
     type: http
-    url: "https://api.githubcopilot.com/mcp/"
-    headers:
-      Authorization: "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
+    url: "https://mcp.context7.com/mcp"
+  # A local (stdio) server example:
   - name: my-local-server
     type: stdio
     command: npx
@@ -60,24 +60,43 @@ ai_agents_mcp_servers:
       SOME_FLAG: "1"
 ```
 
-**Never put a secret in this variable.** The GitHub header references the
-`GITHUB_PERSONAL_ACCESS_TOKEN` environment variable; Claude Code expands `${VAR}` in
-headers at runtime, so only the placeholder — never the token — is written to
-`~/.claude.json`.
+**Never put a secret in this variable.** Reference credentials through an environment
+variable instead — Claude Code expands `${VAR}` in urls, headers, and env values at
+runtime, so only the placeholder (never the secret) is written to `~/.claude.json`.
+Context7 needs no credential; for higher rate limits add a header referencing an env var:
 
-> **Why a token and not OAuth?** GitHub's MCP auth server does not support OAuth Dynamic
-> Client Registration, which Claude Code requires, so the OAuth flow fails with
-> `Incompatible auth server: does not support dynamic client registration`
-> ([claude-code#50092](https://github.com/anthropics/claude-code/issues/50092)). A
-> Personal Access Token is the working remote path.
+```yaml
+headers:
+  CONTEXT7_API_KEY: "${CONTEXT7_API_KEY}"
+```
 
-### Authenticating the GitHub server
+> **AGY/Antigravity does not expand `${VAR}`.** Any server that needs a secret will not
+> authenticate there — configure those by hand in AGY if you need them (never commit a
+> token). Keyless servers like Context7 work in both tools.
 
-The role registers the server; you supply the token via the environment.
+### Adding the GitHub server (opt-in)
+
+The GitHub MCP server is **not** a default because every variant requires a Personal
+Access Token — OAuth fails Claude Code's Dynamic Client Registration requirement
+(`Incompatible auth server: does not support dynamic client registration`,
+[claude-code#52638](https://github.com/anthropics/claude-code/issues/52638)), and the
+local Docker/binary servers only accept a PAT
+([github-mcp-server#600](https://github.com/github/github-mcp-server/issues/600)). Add it
+to `ai_agents_mcp_servers` yourself if you want it:
+
+```yaml
+- name: github
+  type: http
+  url: "https://api.githubcopilot.com/mcp/"
+  headers:
+    Authorization: "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
+```
+
+Then supply the token via the environment:
 
 ```bash
 # 1. Create a GitHub Personal Access Token (fine-grained, scoped to the repos you want
-#    Claude to access): https://github.com/settings/personal-access-tokens
+#    the agent to access): https://github.com/settings/personal-access-tokens
 
 # 2. Export it where your shell will pick it up (e.g. ~/.bashrc, or a secrets manager).
 #    Do NOT paste it into the playbook or any committed file.
@@ -88,15 +107,9 @@ claude mcp list
 # github: https://api.githubcopilot.com/mcp/ (HTTP) - ✓ Connected
 ```
 
-Notes:
-
-- The token is read from the environment at launch — restart `claude` after exporting it.
-  If the variable is unset, the server simply reports `Failed to connect`.
-- MCP tools load at session startup, so start a fresh `claude` session for the github
-  tools to appear.
-- Re-running the role is idempotent and does not overwrite an existing token.
-- **AGY/Antigravity** does not expand `${VAR}`, so the github entry it receives will not
-  authenticate; configure GitHub auth in AGY by hand if you need it (never commit a token).
+The token is read from the environment at launch — restart `claude` after exporting it.
+If the variable is unset, the server simply reports `Failed to connect`. Re-running the
+role is idempotent and does not overwrite existing servers.
 
 ## Bring Your Own Config Repo
 
