@@ -19,7 +19,9 @@
       ansible.builtin.set_fact:
         ai_agents_claude_mcp_existing: >-
           {{ ((ai_agents_claude_config_raw.content | b64decode | from_json).mcpServers | default({}) | list)
-             if ai_agents_claude_config_raw.content is defined else [] }}
+             if (ai_agents_claude_config_raw.content is defined
+                 and (ai_agents_claude_config_raw.content | b64decode | trim) != '')
+             else [] }}
 
     - name: Register MCP servers with Claude Code (user scope)
       ansible.builtin.command:
