@@ -22,7 +22,7 @@ argument_specs:
         default: true
       ai_agents_mcp_servers_source:
         type: str
-        description: Source `uv tool install` pulls the `mcp-servers` package from
+        description: Source URL that `uv tool install` uses for the `mcp-servers` package
         default: "git+https://github.com/jahrik/mcp-servers"
       ai_agents_mcp_servers_upgrade:
         type: bool
