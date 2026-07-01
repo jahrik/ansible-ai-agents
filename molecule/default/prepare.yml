@@ -10,6 +10,13 @@
       changed_when: false
       when: ansible_facts['os_family'] == 'Archlinux'
 
+    - name: Update apt cache (Debian)
+      become: true
+      ansible.builtin.apt:
+        update_cache: true
+      changed_when: false
+      when: ansible_facts['os_family'] == 'Debian'
+
     - name: Install curl
       become: true
       ansible.builtin.package:
