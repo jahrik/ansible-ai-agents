@@ -18,12 +18,36 @@
     - name: Determine MCP servers already registered with Claude Code
       ansible.builtin.set_fact:
         ai_agents_claude_mcp_existing: >-
-          {{ ((ai_agents_claude_config_raw.content | b64decode | from_json).mcpServers | default({}) | list)
+          {{ ((ai_agents_claude_config_raw.content | b64decode | from_json).mcpServers | default({}))
              if (ai_agents_claude_config_raw.content is defined
                  and (ai_agents_claude_config_raw.content | b64decode | trim) != '')
-             else [] }}
+             else {} }}
+
+    # add-json refuses to overwrite an existing server, so a server whose
+    # definition has drifted (combining the desired blob into the stored one
+    # would change it) is removed first, then re-registered below. Servers that
+    # already match are left untouched, keeping the run idempotent.
+    - name: Remove drifted MCP servers from Claude Code (user scope)
+      vars:
+        desired_blob: &desired_blob >-
+          {{ ({'type': 'http', 'url': item.url}
+              | combine({'headers': item.headers} if item.headers is defined else {}))
+             if (item.type | default('stdio')) == 'http'
+             else ({'command': item.command, 'args': item.args | default([])}
+                   | combine({'env': item.env} if item.env is defined else {})) }}
+      ansible.builtin.command:
+        argv: ["{{ ai_agents_claude_bin }}", mcp, remove, "{{ item.name }}", --scope, user]
+      loop: "{{ ai_agents_mcp_servers }}"
+      loop_control:
+        label: "{{ item.name }}"
+      when:
+        - item.name in ai_agents_claude_mcp_existing
+        - (ai_agents_claude_mcp_existing[item.name] | combine(desired_blob)) != ai_agents_claude_mcp_existing[item.name]
+      changed_when: true
 
     - name: Register MCP servers with Claude Code (user scope)
+      vars:
+        desired_blob: *desired_blob
       ansible.builtin.command:
         argv:
           - "{{ ai_agents_claude_bin }}"
@@ -32,18 +56,13 @@
           - --scope
           - user
           - "{{ item.name }}"
-          - >-
-            {{ (
-                 ({'type': 'http', 'url': item.url}
-                  | combine({'headers': item.headers} if item.headers is defined else {}))
-                 if (item.type | default('stdio')) == 'http'
-                 else ({'command': item.command, 'args': item.args | default([])}
-                       | combine({'env': item.env} if item.env is defined else {}))
-               ) | to_json }}
+          - "{{ desired_blob | to_json }}"
       loop: "{{ ai_agents_mcp_servers }}"
       loop_control:
         label: "{{ item.name }}"
-      when: item.name not in ai_agents_claude_mcp_existing
+      when: >-
+        item.name not in ai_agents_claude_mcp_existing
+        or (ai_agents_claude_mcp_existing[item.name] | combine(desired_blob)) != ai_agents_claude_mcp_existing[item.name]
       changed_when: true
 
 - name: Configure MCP servers for AGY/Antigravity
