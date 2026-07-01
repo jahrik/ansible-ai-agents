@@ -44,6 +44,7 @@
         - item.name in ai_agents_claude_mcp_existing
         - (ai_agents_claude_mcp_existing[item.name] | combine(desired_blob)) != ai_agents_claude_mcp_existing[item.name]
       changed_when: true
+      no_log: true
 
     - name: Register MCP servers with Claude Code (user scope)
       vars:
@@ -64,6 +65,7 @@
         item.name not in ai_agents_claude_mcp_existing
         or (ai_agents_claude_mcp_existing[item.name] | combine(desired_blob)) != ai_agents_claude_mcp_existing[item.name]
       changed_when: true
+      no_log: true
 
 - name: Configure MCP servers for AGY/Antigravity
   when:

@@ -90,6 +90,25 @@ runtime, so only the placeholder (never the secret) is written to `~/.claude.jso
 > **AGY/Antigravity does not expand `${VAR}`.** A secret-bearing server won't authenticate
 > there — configure those by hand in AGY if you need them (never commit a token).
 
+## Tags
+
+Run or skip parts of the role with tags:
+
+```bash
+ansible-playbook playbook.yml --tags ai_agents:install
+ansible-playbook playbook.yml --skip-tags ai_agents:mcp_servers
+```
+
+| Tag                     | Scope                             |
+| ----------------------- | --------------------------------- |
+| `ai_agents`             | All role tasks                    |
+| `ai_agents:vars`        | OS-specific variable loading      |
+| `ai_agents:install`     | Agent CLI installs                |
+| `ai_agents:clone`       | Clone the agent config repo       |
+| `ai_agents:symlinks`    | Wire config repo into tool paths  |
+| `ai_agents:mcp_servers` | Install the `mcp-servers` package |
+| `ai_agents:mcp`         | Register MCP servers              |
+
 ## Bring Your Own Config Repo
 
 Point the role at your own fork of `agent-config`:

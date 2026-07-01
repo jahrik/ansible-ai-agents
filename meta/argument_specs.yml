@@ -1,0 +1,82 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure AI coding agents
+    options:
+      ai_agents_install:
+        type: dict
+        description: Per-agent install toggles
+        default:
+          agy: true
+          claude_code: true
+          aider: false
+          codex: false
+          cursor: false
+      ai_agents_claude_bin:
+        type: str
+        description: Claude Code CLI path, used to register MCP servers via `claude mcp add-json`
+        default: "{{ ansible_facts['env']['HOME'] }}/.local/bin/claude"
+      ai_agents_mcp_servers_install:
+        type: bool
+        description: Install the `mcp-servers` package (via `uv tool`)
+        default: true
+      ai_agents_mcp_servers_source:
+        type: str
+        description: Source `uv tool install` pulls the `mcp-servers` package from
+        default: "git+https://github.com/jahrik/mcp-servers"
+      ai_agents_mcp_servers_upgrade:
+        type: bool
+        description: Force-reinstall `mcp-servers` to pull the latest commit (install is otherwise once-only)
+        default: false
+      ai_agents_uv_bin:
+        type: str
+        description: Path to the `uv` binary, bootstrapped if missing
+        default: "{{ ansible_facts['env']['HOME'] }}/.local/bin/uv"
+      ai_agents_mcp_github_bin:
+        type: str
+        description: Path to the installed `mcp-github` console script
+        default: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-github"
+      ai_agents_mcp_servers:
+        type: list
+        elements: dict
+        description: MCP servers to register with the enabled agents (Claude Code + AGY)
+        default:
+          - name: github
+            type: stdio
+            command: "{{ ai_agents_mcp_github_bin }}"
+            args: []
+      ai_agents_config_repo:
+        type: str
+        description: Git URL of the agent config repo to clone
+        default: "https://github.com/jahrik/agent-config"
+      ai_agents_config_ref:
+        type: str
+        description: Branch or tag to check out
+        default: main
+      ai_agents_config_dest:
+        type: str
+        description: Clone destination for the agent config repo
+        default: "{{ ansible_facts['env']['HOME'] }}/.config/agents"
+      ai_agents_backup_existing:
+        type: bool
+        description: >-
+          Back up a pre-existing real file/directory at a symlink target instead of
+          failing or destroying it
+        default: true
+      ai_agents_symlinks:
+        type: list
+        elements: dict
+        description: Symlink targets wiring the config repo into tool-expected locations
+        default:
+          - src: "{{ ai_agents_config_dest }}/skills"
+            dest: "{{ ansible_facts['env']['HOME'] }}/.claude/skills"
+          - src: "{{ ai_agents_config_dest }}/agents"
+            dest: "{{ ansible_facts['env']['HOME'] }}/.claude/agents"
+          - src: "{{ ai_agents_config_dest }}/AGENTS.md"
+            dest: "{{ ansible_facts['env']['HOME'] }}/.claude/CLAUDE.md"
+          - src: "{{ ai_agents_config_dest }}/AGENTS.md"
+            dest: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/AGENTS.md"
+          - src: "{{ ai_agents_config_dest }}/skills"
+            dest: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/skills"
+          - src: "{{ ai_agents_config_dest }}/agents"
+            dest: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/agents"
