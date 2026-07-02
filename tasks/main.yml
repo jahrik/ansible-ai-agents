@@ -9,23 +9,66 @@
       paths:
         - "vars"
       skip: true
+  tags:
+    - ai_agents
+    - "ai_agents:vars"
 
 - name: Install agents
-  ansible.builtin.include_tasks: "install/{{ item.key }}.yml"
+  ansible.builtin.include_tasks:
+    file: "install/{{ item.key }}.yml"
+    apply:
+      tags:
+        - ai_agents
+        - "ai_agents:install"
   loop: "{{ ai_agents_install | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
   when: item.value | bool
+  tags:
+    - ai_agents
+    - "ai_agents:install"
 
 - name: Clone agent config repo
-  ansible.builtin.include_tasks: config/clone.yml
+  ansible.builtin.include_tasks:
+    file: config/clone.yml
+    apply:
+      tags:
+        - ai_agents
+        - "ai_agents:clone"
+  tags:
+    - ai_agents
+    - "ai_agents:clone"
 
 - name: Create symlinks
-  ansible.builtin.include_tasks: config/symlinks.yml
+  ansible.builtin.include_tasks:
+    file: config/symlinks.yml
+    apply:
+      tags:
+        - ai_agents
+        - "ai_agents:symlinks"
+  tags:
+    - ai_agents
+    - "ai_agents:symlinks"
 
 - name: Install MCP servers package
-  ansible.builtin.include_tasks: config/mcp_servers.yml
+  ansible.builtin.include_tasks:
+    file: config/mcp_servers.yml
+    apply:
+      tags:
+        - ai_agents
+        - "ai_agents:mcp_servers"
   when: ai_agents_mcp_servers_install | bool
+  tags:
+    - ai_agents
+    - "ai_agents:mcp_servers"
 
 - name: Configure MCP servers
-  ansible.builtin.include_tasks: config/mcp.yml
+  ansible.builtin.include_tasks:
+    file: config/mcp.yml
+    apply:
+      tags:
+        - ai_agents
+        - "ai_agents:mcp"
+  tags:
+    - ai_agents
+    - "ai_agents:mcp"

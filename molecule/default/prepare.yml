@@ -10,22 +10,18 @@
       changed_when: false
       when: ansible_facts['os_family'] == 'Archlinux'
 
-    - name: Install curl (Arch)
-      become: true
-      community.general.pacman:
-        name:
-          - curl
-        state: present
-      when: ansible_facts['os_family'] == 'Archlinux'
-
-    - name: Install curl (Debian/Ubuntu)
+    - name: Update apt cache (Debian)
       become: true
       ansible.builtin.apt:
-        name:
-          - curl
-        state: present
         update_cache: true
+      changed_when: false
       when: ansible_facts['os_family'] == 'Debian'
+
+    - name: Install curl
+      become: true
+      ansible.builtin.package:
+        name: curl
+        state: present
 
     # Simulate a machine that already has real Claude config, so the role's
     # backup-then-link path is exercised (a real directory and a real file).

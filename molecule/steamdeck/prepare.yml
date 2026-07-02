@@ -35,4 +35,3 @@
         name:
           - curl
           - unzip
-        state: present
