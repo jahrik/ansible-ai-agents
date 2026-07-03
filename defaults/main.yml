@@ -33,6 +33,11 @@ ai_agents_mcp_servers:
     type: stdio
     command: "{{ ai_agents_mcp_github_bin }}"
     args: []
+    env:
+      MCP_GITHUB_ALLOW_WRITE: "{{ '1' if ai_agents_mcp_github_allow_write else '0' }}"
+
+# Enable write operations for the mcp-github server (merging PRs, creating issues, etc.)
+ai_agents_mcp_github_allow_write: true
 
 # Config repo — override this with your own fork
 ai_agents_config_repo: "https://github.com/jahrik/agent-config"

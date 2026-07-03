@@ -45,6 +45,16 @@ argument_specs:
             type: stdio
             command: "{{ ai_agents_mcp_github_bin }}"
             args: []
+            env:
+              MCP_GITHUB_ALLOW_WRITE: "{{ '1' if ai_agents_mcp_github_allow_write else '0' }}"
+      ai_agents_mcp_github_allow_write:
+        type: bool
+        description: >-
+          Enable write operations for the mcp-github server. When true, the `MCP_GITHUB_ALLOW_WRITE=1`
+          environment variable is passed to the server, allowing agents to execute mutating operations
+          (e.g., merging PRs, creating issues, commenting on reviews). When false, only read operations
+          are allowed.
+        default: true
       ai_agents_config_repo:
         type: str
         description: Git URL of the agent config repo to clone
