@@ -1,11 +1,111 @@
 ---
-# Which agents to install
+# Which agents and tooling to install (each key maps to tasks/install/<key>.yml)
 ai_agents_install:
   agy: true
   claude_code: true
   aider: false
   codex: false
   cursor: false
+  cli_tools: true
+  repo_sync: true
+
+# Where standalone binaries land (no root needed; works on immutable rootfs)
+ai_agents_bin_dir: "{{ ansible_facts['env']['HOME'] }}/.local/bin"
+
+# Standard CLI toolchain, installed as pinned static release binaries into
+# ai_agents_bin_dir (x86_64 Linux). archive: raw = the asset IS the binary;
+# tar/zip = extract and copy `src` out of it. Bump versions here.
+ai_agents_cli_tools:
+  - name: rg
+    version: "15.1.0"
+    archive: tar
+    url: "https://github.com/BurntSushi/ripgrep/releases/download/15.1.0/ripgrep-15.1.0-x86_64-unknown-linux-musl.tar.gz"
+    src: "ripgrep-15.1.0-x86_64-unknown-linux-musl/rg"
+  - name: fd
+    version: "10.4.2"
+    archive: tar
+    url: "https://github.com/sharkdp/fd/releases/download/v10.4.2/fd-v10.4.2-x86_64-unknown-linux-musl.tar.gz"
+    src: "fd-v10.4.2-x86_64-unknown-linux-musl/fd"
+  - name: jq
+    version: "1.8.2"
+    archive: raw
+    url: "https://github.com/jqlang/jq/releases/download/jq-1.8.2/jq-linux-amd64"
+  - name: yq
+    version: "4.53.3"
+    archive: raw
+    url: "https://github.com/mikefarah/yq/releases/download/v4.53.3/yq_linux_amd64"
+  - name: bat
+    version: "0.26.1"
+    archive: tar
+    url: "https://github.com/sharkdp/bat/releases/download/v0.26.1/bat-v0.26.1-x86_64-unknown-linux-musl.tar.gz"
+    src: "bat-v0.26.1-x86_64-unknown-linux-musl/bat"
+  - name: delta
+    version: "0.19.2"
+    archive: tar
+    url: "https://github.com/dandavison/delta/releases/download/0.19.2/delta-0.19.2-x86_64-unknown-linux-musl.tar.gz"
+    src: "delta-0.19.2-x86_64-unknown-linux-musl/delta"
+  - name: ast-grep
+    version: "0.44.0"
+    archive: zip
+    url: "https://github.com/ast-grep/ast-grep/releases/download/0.44.0/app-x86_64-unknown-linux-gnu.zip"
+    src: "ast-grep"
+  - name: xsv
+    version: "0.13.0"
+    archive: tar
+    url: "https://github.com/BurntSushi/xsv/releases/download/0.13.0/xsv-0.13.0-x86_64-unknown-linux-musl.tar.gz"
+    src: "xsv"
+  - name: htmlq
+    version: "0.4.0"
+    archive: tar
+    url: "https://github.com/mgdm/htmlq/releases/download/v0.4.0/htmlq-x86_64-linux.tar.gz"
+    src: "htmlq"
+  - name: gron
+    version: "0.7.1"
+    archive: tar
+    url: "https://github.com/tomnomnom/gron/releases/download/v0.7.1/gron-linux-amd64-0.7.1.tgz"
+    src: "gron"
+  - name: jc
+    version: "1.25.7"
+    archive: tar
+    url: "https://github.com/kellyjonbrazil/jc/releases/download/v1.25.7/jc-1.25.7-linux-x86_64.tar.gz"
+    src: "jc"
+  - name: sd
+    version: "1.1.0"
+    archive: tar
+    url: "https://github.com/chmln/sd/releases/download/v1.1.0/sd-v1.1.0-x86_64-unknown-linux-musl.tar.gz"
+    src: "sd-v1.1.0-x86_64-unknown-linux-musl/sd"
+  - name: tokei
+    version: "12.1.2"
+    archive: tar
+    url: "https://github.com/XAMPPRocky/tokei/releases/download/v12.1.2/tokei-x86_64-unknown-linux-musl.tar.gz"
+    src: "tokei"
+  - name: duckdb
+    version: "1.5.4"
+    archive: zip
+    url: "https://github.com/duckdb/duckdb/releases/download/v1.5.4/duckdb_cli-linux-amd64.zip"
+    src: "duckdb"
+  - name: shellcheck
+    version: "0.11.0"
+    archive: tar
+    url: "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.gz"
+    src: "shellcheck-v0.11.0/shellcheck"
+  - name: shfmt
+    version: "3.13.1"
+    archive: raw
+    url: "https://github.com/mvdan/sh/releases/download/v3.13.1/shfmt_v3.13.1_linux_amd64"
+  - name: hadolint
+    version: "2.14.0"
+    archive: raw
+    url: "https://github.com/hadolint/hadolint/releases/download/v2.14.0/hadolint-linux-x86_64"
+  - name: actionlint
+    version: "1.7.12"
+    archive: tar
+    url: "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz"
+    src: "actionlint"
+
+# repo-sync (Go CLI: sync/clean/report across GitHub repos) — release binary
+ai_agents_repo_sync_version: "0.2.2"
+ai_agents_repo_sync_url: "https://github.com/jahrik/repo-sync/releases/download/v0.2.2/repo-sync_0.2.2_linux_amd64.tar.gz"
 
 # Claude Code CLI path (installed by tasks/install/claude_code.yml) — used to
 # register MCP servers via `claude mcp add-json`.

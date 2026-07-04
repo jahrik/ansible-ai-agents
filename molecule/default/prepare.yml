@@ -17,10 +17,12 @@
       changed_when: false
       when: ansible_facts['os_family'] == 'Debian'
 
-    - name: Install curl
+    - name: Install curl and unzip (unzip extracts the ast-grep zip asset)
       become: true
       ansible.builtin.package:
-        name: curl
+        name:
+          - curl
+          - unzip
         state: present
 
     # Simulate a machine that already has real Claude config, so the role's

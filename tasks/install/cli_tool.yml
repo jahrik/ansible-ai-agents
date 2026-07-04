@@ -1,0 +1,46 @@
+---
+# Install a single CLI tool (loop body for cli_tools.yml; `tool` is set by the
+# loop). Skipped entirely when the binary already exists — bump the version in
+# defaults and delete the binary to upgrade.
+- name: "Check for an existing binary of {{ tool.name }}"
+  ansible.builtin.stat:
+    path: "{{ ai_agents_bin_dir }}/{{ tool.name }}"
+  register: cli_tool_bin
+
+- name: "Install the pinned release of {{ tool.name }}"
+  when: not cli_tool_bin.stat.exists
+  block:
+    - name: "Download the raw binary for {{ tool.name }}"
+      ansible.builtin.get_url:
+        url: "{{ tool.url }}"
+        dest: "{{ ai_agents_bin_dir }}/{{ tool.name }}"
+        mode: '0755'
+      when: tool.archive == 'raw'
+
+    - name: "Create a temp directory for {{ tool.name }}"
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: cli-tool
+      register: cli_tool_tmp
+      when: tool.archive != 'raw'
+
+    - name: "Download and extract the archive for {{ tool.name }}"
+      ansible.builtin.unarchive:
+        src: "{{ tool.url }}"
+        dest: "{{ cli_tool_tmp.path }}"
+        remote_src: true
+      when: tool.archive != 'raw'
+
+    - name: "Install the extracted binary for {{ tool.name }}"
+      ansible.builtin.copy:
+        src: "{{ cli_tool_tmp.path }}/{{ tool.src }}"
+        dest: "{{ ai_agents_bin_dir }}/{{ tool.name }}"
+        mode: '0755'
+        remote_src: true
+      when: tool.archive != 'raw'
+
+    - name: "Remove the temp directory for {{ tool.name }}"
+      ansible.builtin.file:
+        path: "{{ cli_tool_tmp.path }}"
+        state: absent
+      when: tool.archive != 'raw'
