@@ -46,6 +46,20 @@ file**. See [MCP Servers](#mcp-servers).
 | `ai_agents_mcp_servers_source`  | `git+https://github.com/jahrik/mcp-servers` | Source `uv tool install` pulls the package from                                          |
 | `ai_agents_mcp_servers_upgrade` | `false`                                     | Force-reinstall `mcp-servers` to pull the latest commit (install is otherwise once-only) |
 
+## CLI Toolchain
+
+The role optionally installs a standardized agent CLI toolchain into `~/.local/bin` (bypassing root/system packages). These are pinned static release binaries to ensure the agent has the tools it needs across all distributions (and works on immutable rootfs).
+
+- **Tools:** `rg`, `fd`, `jq`, `yq`, `bat`, `delta`, `ast-grep`, `xsv`, `htmlq`, `gron`, `jc`, `sd`, `tokei`, `duckdb`
+- **Linters:** `shellcheck`, `shfmt`, `hadolint`, `actionlint`
+- **Utilities:** `repo-sync`
+
+This is controlled by `ai_agents_install.cli_tools` (and `ai_agents_install.repo_sync`) in your variables.
+
+### Upgrading Tools
+
+The role is idempotent — it skips downloads if the binary already exists. To upgrade a tool, bump its pinned version in `defaults/main.yml` and delete the old binary from `~/.local/bin` before running the playbook.
+
 ## MCP Servers
 
 `ai_agents_mcp_servers` defines MCP servers to register with every enabled agent that
