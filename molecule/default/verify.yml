@@ -104,5 +104,47 @@
         that: ai_agents_backups.matched >= 2
         fail_msg: "pre-existing CLAUDE.md / skills were not backed up before linking"
 
+    - name: Stat each CLI tool binary
+      ansible.builtin.stat:
+        path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/{{ item }}"
+      loop:
+        - rg
+        - fd
+        - jq
+        - yq
+        - bat
+        - delta
+        - ast-grep
+        - xsv
+        - htmlq
+        - gron
+        - jc
+        - sd
+        - tokei
+        - duckdb
+        - shellcheck
+        - shfmt
+        - hadolint
+        - actionlint
+        - repo-sync
+      register: cli_tool_stats
+
+    - name: Assert every CLI tool binary is installed and executable
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.executable
+        fail_msg: "{{ item.item }} was not installed to ~/.local/bin"
+      loop: "{{ cli_tool_stats.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Run rg and jq to prove the binaries execute
+      ansible.builtin.command: "{{ ansible_facts['env']['HOME'] }}/.local/bin/{{ item }} --version"
+      loop:
+        - rg
+        - jq
+      changed_when: false
+
     - name: Verify installed agents and their config wiring
       ansible.builtin.include_tasks: tasks/verify_agents.yml

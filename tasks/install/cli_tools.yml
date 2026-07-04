@@ -1,0 +1,26 @@
+---
+# Install the standard CLI toolchain as pinned static binaries into
+# ai_agents_bin_dir. Release assets are x86_64-only; other architectures skip
+# with a warning rather than failing the whole role.
+- name: Warn and skip CLI tools on non-x86_64 hosts
+  ansible.builtin.debug:
+    msg: >-
+      Skipping CLI toolchain: pinned release assets are x86_64 Linux and this
+      host is {{ ansible_facts['architecture'] }}.
+  when: ansible_facts['architecture'] != 'x86_64'
+
+- name: Install CLI tools
+  when: ansible_facts['architecture'] == 'x86_64'
+  block:
+    - name: Ensure bin directory exists
+      ansible.builtin.file:
+        path: "{{ ai_agents_bin_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Install each CLI tool
+      ansible.builtin.include_tasks: cli_tool.yml
+      loop: "{{ ai_agents_cli_tools }}"
+      loop_control:
+        loop_var: tool
+        label: "{{ tool.name }} {{ tool.version }}"

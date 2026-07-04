@@ -12,3 +12,5 @@
           aider: true
           codex: true
           cursor: false
+          cli_tools: true
+          repo_sync: true
