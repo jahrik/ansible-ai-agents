@@ -5,11 +5,19 @@
 # identity separation: agents act as the GitHub App through mcp-github;
 # the gh CLI stays the human's own session.
 
+- name: Ensure the Claude Code config directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.claude"
+    state: directory
+    mode: "0755"
+
 - name: Read existing Claude Code settings
   ansible.builtin.slurp:
     src: "{{ ansible_facts['env']['HOME'] }}/.claude/settings.json"
   register: ai_agents_claude_settings_raw
-  failed_when: false
+  failed_when:
+    - ai_agents_claude_settings_raw.failed
+    - "'file not found' not in (ai_agents_claude_settings_raw.msg | default('') | lower)"
 
 - name: Merge the managed deny rules and hooks into the settings
   block:
@@ -40,4 +48,4 @@
   rescue:
     - name: Fail with a clear message if settings.json is invalid
       ansible.builtin.fail:
-        msg: "Failed to merge managed rules into ~/.claude/settings.json. If the file was hand-edited, please ensure it contains valid JSON, or delete it to let Claude Code recreate it."
+        msg: "Failed to merge managed rules into ~/.claude/settings.json: {{ ansible_failed_result.msg | default('Unknown error') }}. If the file was hand-edited, please ensure it contains valid JSON, or delete it to let Claude Code recreate it."

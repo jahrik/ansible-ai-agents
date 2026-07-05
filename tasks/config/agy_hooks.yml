@@ -14,7 +14,9 @@
   ansible.builtin.slurp:
     src: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/hooks.json"
   register: ai_agents_agy_hooks_raw
-  failed_when: false
+  failed_when:
+    - ai_agents_agy_hooks_raw.failed
+    - "'file not found' not in (ai_agents_agy_hooks_raw.msg | default('') | lower)"
 
 - name: Merge the managed hook groups into hooks.json
   block:
@@ -32,4 +34,4 @@
   rescue:
     - name: Fail with a clear message if hooks.json is invalid
       ansible.builtin.fail:
-        msg: "Failed to merge managed rules into ~/.gemini/config/hooks.json. If the file was hand-edited, please ensure it contains valid JSON, or delete it to let AGY recreate it."
+        msg: "Failed to merge managed rules into ~/.gemini/config/hooks.json: {{ ansible_failed_result.msg | default('Unknown error') }}. If the file was hand-edited, please ensure it contains valid JSON, or delete it to let AGY recreate it."
