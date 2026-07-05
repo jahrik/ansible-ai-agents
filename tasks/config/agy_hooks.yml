@@ -21,7 +21,7 @@
     - name: Write the merged hooks
       vars:
         existing: >-
-          {{ (ai_agents_agy_hooks_raw.content | b64decode | from_json)
+          {{ (ai_agents_agy_hooks_raw.content | b64decode | from_json | default({}, true))
              if (ai_agents_agy_hooks_raw.content is defined
                  and (ai_agents_agy_hooks_raw.content | b64decode | trim) != '')
              else {} }}
@@ -32,4 +32,4 @@
   rescue:
     - name: Fail with a clear message if hooks.json is invalid
       ansible.builtin.fail:
-        msg: "Failed to parse ~/.gemini/config/hooks.json. Please ensure it contains valid JSON, or delete it to let AGY recreate it."
+        msg: "Failed to merge managed rules into ~/.gemini/config/hooks.json. If the file was hand-edited, please ensure it contains valid JSON, or delete it to let AGY recreate it."

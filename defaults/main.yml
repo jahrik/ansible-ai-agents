@@ -158,7 +158,7 @@ ai_agents_mcp_workspace_root: "{{ ansible_facts['env']['HOME'] }}/github"
 
 # Permission deny rules merged into ~/.claude/settings.json (other settings
 # keys are preserved). The gh entries enforce identity separation: agents do
-# GitHub work as the App through mcp-github (Hard Rule 8); the gh CLI remains
+# GitHub work as the App through mcp-github (Hard Rule 7); the gh CLI remains
 # the human's own authenticated session. Note: a prefix deny cannot catch gh
 # nested inside compound commands — the guard-bash hook below covers that layer.
 ai_agents_claude_permission_deny:

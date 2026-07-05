@@ -16,20 +16,21 @@
     - name: Write the merged settings
       vars:
         existing: >-
-          {{ (ai_agents_claude_settings_raw.content | b64decode | from_json)
+          {{ (ai_agents_claude_settings_raw.content | b64decode | from_json | default({}, true))
              if (ai_agents_claude_settings_raw.content is defined
                  and (ai_agents_claude_settings_raw.content | b64decode | trim) != '')
              else {} }}
         merged_deny: >-
-          {{ (existing.permissions | default({})).deny | default([])
+          {{ (existing.permissions | default({}, true)).deny | default([], true)
              | union(ai_agents_claude_permission_deny) | sort }}
         merged_hooks: >-
-          {{ existing.hooks | default({})
+          {{ existing.hooks | default({}, true)
              | combine(ai_agents_claude_hooks, list_merge='append_rp') }}
         merged: >-
           {{ existing
-             | combine({'permissions': (existing.permissions | default({}))
-                                       | combine({'deny': merged_deny})})
+             | combine({'permissions': (existing.permissions | default({}, true))
+                                       | combine({'deny': merged_deny})}
+                       if (ai_agents_claude_permission_deny | length > 0) else {})
              | combine({'hooks': merged_hooks}
                        if (ai_agents_claude_hooks | length > 0) else {}) }}
       ansible.builtin.copy:
@@ -39,4 +40,4 @@
   rescue:
     - name: Fail with a clear message if settings.json is invalid
       ansible.builtin.fail:
-        msg: "Failed to parse ~/.claude/settings.json. Please ensure it contains valid JSON, or delete it to let Claude Code recreate it."
+        msg: "Failed to merge managed rules into ~/.claude/settings.json. If the file was hand-edited, please ensure it contains valid JSON, or delete it to let Claude Code recreate it."
