@@ -51,19 +51,16 @@
     or 'Installed' in (ai_agents_mcp_upgrade.stderr | default(''))
   when: ai_agents_mcp_servers_upgrade | bool
 
-# The github server shells out to `gh`; it can only connect once `gh` is
-# installed and `gh auth login` has been run. The role can't do the interactive
-# login, so just surface a clear heads-up if gh is absent — registration still
-# succeeds; the server simply won't connect until gh is set up.
-- name: Check for the GitHub CLI
-  ansible.builtin.command: gh --version
-  register: ai_agents_gh_check
-  changed_when: false
-  failed_when: false
-
-- name: Warn if the GitHub CLI is not available
+# The github server authenticates as a GitHub App. Registration succeeds
+# either way; without the full App identity it just can't connect.
+- name: Warn if the GitHub App identity is not fully configured
   ansible.builtin.debug:
     msg: >-
-      The `gh` CLI was not found on PATH. The default `github` MCP server needs
-      it — install gh and run `gh auth login` for the server to connect.
-  when: ai_agents_gh_check.rc != 0
+      GitHub App identity incomplete (all three of ai_agents_mcp_github_app_id
+      / _installation_id / _private_key_file must be set). The github MCP
+      server is registered but won't authenticate until GITHUB_APP_ID,
+      GITHUB_APP_INSTALLATION_ID and GITHUB_APP_PRIVATE_KEY reach its
+      environment.
+  when:
+    - ai_agents_mcp_servers | selectattr('name', 'equalto', 'github') | list | length > 0
+    - not ai_agents_mcp_github_app_configured | bool

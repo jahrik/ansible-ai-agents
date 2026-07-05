@@ -123,21 +123,61 @@ ai_agents_mcp_github_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-git
 
 # MCP servers to register with the enabled agents (Claude Code + AGY). Entries
 # are 'stdio' (command/args/env) or 'http' (url/headers). Never put a secret
-# here — reference an env var; Claude Code expands ${VAR} at runtime.
+# here — neither Claude Code's user scope nor AGY's mcp_config.json should
+# ever hold one.
 #
-# The default `github` server shells out to `gh`, reusing your `gh auth login`
-# session (no token). Requires the gh CLI installed and authenticated. See the
-# README "MCP Servers" section.
+# The default `github` server authenticates as a GitHub App (writes land as
+# "<app>[bot]"). With the three ai_agents_mcp_github_app_* vars set, it is
+# registered through a wrapper that loads the App identity from an env file
+# and reads the private key from its PEM path at launch — the key content is
+# never written into any config file. Left unset, the bare server is
+# registered and won't authenticate until GITHUB_APP_ID /
+# GITHUB_APP_INSTALLATION_ID / GITHUB_APP_PRIVATE_KEY reach its environment
+# some other way. See the README "MCP Servers" section.
 ai_agents_mcp_servers:
   - name: github
     type: stdio
-    command: "{{ ai_agents_mcp_github_bin }}"
+    command: "{{ ai_agents_mcp_github_command }}"
     args: []
     env:
       MCP_GITHUB_ALLOW_WRITE: "{{ '1' if ai_agents_mcp_github_allow_write else '0' }}"
 
 # Enable write operations for the mcp-github server (merging PRs, creating issues, etc.)
 ai_agents_mcp_github_allow_write: true
+
+# GitHub App identity for the github server. The App ID and installation ID
+# are not secrets; the private key stays wherever its PEM already lives — the
+# role records only the *path*. Set all three (host_vars / play vars) to
+# enable the wrapper.
+ai_agents_mcp_github_app_id: ""
+ai_agents_mcp_github_app_installation_id: ""
+ai_agents_mcp_github_app_private_key_file: ""
+
+# Where the App identity lands when the vars above are set.
+ai_agents_mcp_github_env_file: "{{ ansible_facts['env']['HOME'] }}/.config/ai-agents/github-app.env"
+ai_agents_mcp_github_wrapper: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-github-app"
+
+# True once the App identity is fully configured (all three vars set) — the
+# single gate for the wrapper deploy, the registered command, and the warning.
+ai_agents_mcp_github_app_configured: >-
+  {{ ai_agents_mcp_github_app_id | length > 0
+     and ai_agents_mcp_github_app_installation_id | length > 0
+     and ai_agents_mcp_github_app_private_key_file | length > 0 }}
+
+# Register the wrapper when the App identity is configured, the bare server
+# binary otherwise.
+ai_agents_mcp_github_command: >-
+  {{ ai_agents_mcp_github_wrapper
+     if ai_agents_mcp_github_app_configured | bool
+     else ai_agents_mcp_github_bin }}
+
+# Git identity for the workspace, so local commits match the agent's GitHub
+# App bot identity (e.g. "myapp[bot]" /
+# "<bot-user-id>+myapp[bot]@users.noreply.github.com") and complete the audit
+# trail alongside Co-Authored-By trailers. Applied globally for the target
+# user; left empty, git config is untouched.
+ai_agents_git_user_name: ""
+ai_agents_git_user_email: ""
 
 # Config repo — override this with your own fork
 ai_agents_config_repo: "https://github.com/jahrik/agent-config"

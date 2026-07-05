@@ -1,0 +1,14 @@
+---
+# Point the target user's global git identity at the agent's bot account, so
+# local commits match the GitHub App identity mcp-github writes with.
+
+- name: Set the global git identity
+  community.general.git_config:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    scope: global
+  loop:
+    - { name: "user.name", value: "{{ ai_agents_git_user_name }}" }
+    - { name: "user.email", value: "{{ ai_agents_git_user_email }}" }
+  loop_control:
+    label: "{{ item.name }}"
