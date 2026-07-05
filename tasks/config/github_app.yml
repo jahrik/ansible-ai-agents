@@ -17,6 +17,14 @@
       {{ ai_agents_mcp_github_app_private_key_file }}, which does not exist.
       Place the GitHub App PEM there or fix the path.
 
+- name: Assert the GitHub App private key is not group/world accessible
+  ansible.builtin.assert:
+    that: ai_agents_github_app_key.stat.mode[-2:] == '00'
+    fail_msg: >-
+      {{ ai_agents_mcp_github_app_private_key_file }} is mode
+      {{ ai_agents_github_app_key.stat.mode }} — the GitHub App key must be
+      owner-only. Fix with: chmod 600 on the PEM.
+
 - name: Create the ai-agents config directory
   ansible.builtin.file:
     path: "{{ ai_agents_mcp_github_env_file | dirname }}"

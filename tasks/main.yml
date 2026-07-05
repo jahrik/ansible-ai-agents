@@ -69,10 +69,7 @@
       tags:
         - ai_agents
         - "ai_agents:github_app"
-  when:
-    - ai_agents_mcp_github_app_id | length > 0
-    - ai_agents_mcp_github_app_installation_id | length > 0
-    - ai_agents_mcp_github_app_private_key_file | length > 0
+  when: ai_agents_mcp_github_app_configured | bool
   tags:
     - ai_agents
     - "ai_agents:github_app"

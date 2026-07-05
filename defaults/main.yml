@@ -157,11 +157,18 @@ ai_agents_mcp_github_app_private_key_file: ""
 ai_agents_mcp_github_env_file: "{{ ansible_facts['env']['HOME'] }}/.config/ai-agents/github-app.env"
 ai_agents_mcp_github_wrapper: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-github-app"
 
+# True once the App identity is fully configured (all three vars set) — the
+# single gate for the wrapper deploy, the registered command, and the warning.
+ai_agents_mcp_github_app_configured: >-
+  {{ ai_agents_mcp_github_app_id | length > 0
+     and ai_agents_mcp_github_app_installation_id | length > 0
+     and ai_agents_mcp_github_app_private_key_file | length > 0 }}
+
 # Register the wrapper when the App identity is configured, the bare server
 # binary otherwise.
 ai_agents_mcp_github_command: >-
   {{ ai_agents_mcp_github_wrapper
-     if ai_agents_mcp_github_app_id | length > 0
+     if ai_agents_mcp_github_app_configured | bool
      else ai_agents_mcp_github_bin }}
 
 # Git identity for the workspace, so local commits match the agent's GitHub

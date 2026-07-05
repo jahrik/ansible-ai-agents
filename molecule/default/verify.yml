@@ -168,8 +168,8 @@
         env_text: "{{ github_app_env_content.content | b64decode }}"
       ansible.builtin.assert:
         that:
-          - "'GITHUB_APP_ID=12345' in env_text"
-          - "'GITHUB_APP_INSTALLATION_ID=67890' in env_text"
+          - "'GITHUB_APP_ID=\"12345\"' in env_text"
+          - "'GITHUB_APP_INSTALLATION_ID=\"67890\"' in env_text"
           - "'molecule-dummy-app.pem' in env_text"
           - "'molecule dummy key' not in env_text"
         fail_msg: "github-app.env is missing the App identity or contains key content"

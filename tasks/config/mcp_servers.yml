@@ -52,13 +52,15 @@
   when: ai_agents_mcp_servers_upgrade | bool
 
 # The github server authenticates as a GitHub App. Registration succeeds
-# either way; without the App identity it just can't connect.
-- name: Warn if no GitHub App identity is configured
+# either way; without the full App identity it just can't connect.
+- name: Warn if the GitHub App identity is not fully configured
   ansible.builtin.debug:
     msg: >-
-      No GitHub App identity configured (ai_agents_mcp_github_app_id /
-      _installation_id / _private_key_file). The github MCP server is
-      registered but won't authenticate until GITHUB_APP_ID,
+      GitHub App identity incomplete (all three of ai_agents_mcp_github_app_id
+      / _installation_id / _private_key_file must be set). The github MCP
+      server is registered but won't authenticate until GITHUB_APP_ID,
       GITHUB_APP_INSTALLATION_ID and GITHUB_APP_PRIVATE_KEY reach its
       environment.
-  when: ai_agents_mcp_github_app_id | length == 0
+  when:
+    - ai_agents_mcp_servers | selectattr('name', 'equalto', 'github') | list | length > 0
+    - not ai_agents_mcp_github_app_configured | bool
