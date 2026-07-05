@@ -20,7 +20,7 @@
          else {} }}
     merged_deny: >-
       {{ (existing.permissions | default({})).deny | default([])
-         | union(ai_agents_claude_permission_deny) }}
+         | union(ai_agents_claude_permission_deny) | sort }}
     merged_hooks: >-
       {{ existing.hooks | default({})
          | combine(ai_agents_claude_hooks, list_merge='append_rp') }}
