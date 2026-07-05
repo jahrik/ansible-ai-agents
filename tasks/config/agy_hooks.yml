@@ -17,13 +17,19 @@
   failed_when: false
 
 - name: Merge the managed hook groups into hooks.json
-  vars:
-    existing: >-
-      {{ (ai_agents_agy_hooks_raw.content | b64decode | from_json)
-         if (ai_agents_agy_hooks_raw.content is defined
-             and (ai_agents_agy_hooks_raw.content | b64decode | trim) != '')
-         else {} }}
-  ansible.builtin.copy:
-    dest: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/hooks.json"
-    content: "{{ existing | combine(ai_agents_agy_hooks) | to_nice_json }}\n"
-    mode: "0644"
+  block:
+    - name: Write the merged hooks
+      vars:
+        existing: >-
+          {{ (ai_agents_agy_hooks_raw.content | b64decode | from_json)
+             if (ai_agents_agy_hooks_raw.content is defined
+                 and (ai_agents_agy_hooks_raw.content | b64decode | trim) != '')
+             else {} }}
+      ansible.builtin.copy:
+        dest: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/hooks.json"
+        content: "{{ existing | combine(ai_agents_agy_hooks) | to_nice_json }}\n"
+        mode: "0644"
+  rescue:
+    - name: Fail with a clear message if hooks.json is invalid
+      ansible.builtin.fail:
+        msg: "Failed to parse ~/.gemini/config/hooks.json. Please ensure it contains valid JSON, or delete it to let AGY recreate it."

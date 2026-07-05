@@ -12,25 +12,31 @@
   failed_when: false
 
 - name: Merge the managed deny rules and hooks into the settings
-  vars:
-    existing: >-
-      {{ (ai_agents_claude_settings_raw.content | b64decode | from_json)
-         if (ai_agents_claude_settings_raw.content is defined
-             and (ai_agents_claude_settings_raw.content | b64decode | trim) != '')
-         else {} }}
-    merged_deny: >-
-      {{ (existing.permissions | default({})).deny | default([])
-         | union(ai_agents_claude_permission_deny) | sort }}
-    merged_hooks: >-
-      {{ existing.hooks | default({})
-         | combine(ai_agents_claude_hooks, list_merge='append_rp') }}
-    merged: >-
-      {{ existing
-         | combine({'permissions': (existing.permissions | default({}))
-                                   | combine({'deny': merged_deny})})
-         | combine({'hooks': merged_hooks}
-                   if (ai_agents_claude_hooks | length > 0) else {}) }}
-  ansible.builtin.copy:
-    dest: "{{ ansible_facts['env']['HOME'] }}/.claude/settings.json"
-    content: "{{ merged | to_nice_json }}\n"
-    mode: "0644"
+  block:
+    - name: Write the merged settings
+      vars:
+        existing: >-
+          {{ (ai_agents_claude_settings_raw.content | b64decode | from_json)
+             if (ai_agents_claude_settings_raw.content is defined
+                 and (ai_agents_claude_settings_raw.content | b64decode | trim) != '')
+             else {} }}
+        merged_deny: >-
+          {{ (existing.permissions | default({})).deny | default([])
+             | union(ai_agents_claude_permission_deny) | sort }}
+        merged_hooks: >-
+          {{ existing.hooks | default({})
+             | combine(ai_agents_claude_hooks, list_merge='append_rp') }}
+        merged: >-
+          {{ existing
+             | combine({'permissions': (existing.permissions | default({}))
+                                       | combine({'deny': merged_deny})})
+             | combine({'hooks': merged_hooks}
+                       if (ai_agents_claude_hooks | length > 0) else {}) }}
+      ansible.builtin.copy:
+        dest: "{{ ansible_facts['env']['HOME'] }}/.claude/settings.json"
+        content: "{{ merged | to_nice_json }}\n"
+        mode: "0644"
+  rescue:
+    - name: Fail with a clear message if settings.json is invalid
+      ansible.builtin.fail:
+        msg: "Failed to parse ~/.claude/settings.json. Please ensure it contains valid JSON, or delete it to let Claude Code recreate it."
