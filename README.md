@@ -50,6 +50,7 @@ file** (the role records only the path to your PEM). See [MCP Servers](#mcp-serv
 | `ai_agents_mcp_github_app_installation_id`  | `""`                                        | GitHub App installation ID                                                               |
 | `ai_agents_mcp_github_app_private_key_file` | `""`                                        | Path to the App's private-key PEM (path only — the key is never copied anywhere)         |
 | `ai_agents_git_user_name` / `_email`        | `""`                                        | Optional global git identity matching the App's `[bot]` account                          |
+| `ai_agents_mcp_workspace_root`              | `~/github`                                  | Root the `workspace` MCP server surveys for git repos                                    |
 
 ## CLI Toolchain
 
@@ -90,6 +91,11 @@ The role installs the package with `uv tool install` (bootstrapping `uv` if need
 `ai_agents_mcp_servers_install: false` to skip that. Leave the `ai_agents_mcp_github_app_*`
 vars unset and the bare server is registered anyway — it just can't authenticate until the
 `GITHUB_APP_*` env vars reach it some other way.
+
+The same package provides the read-only **`ws`** server (`mcp-workspace`), registered by
+default: local git surveys (dirty trees, unpushed work, stale branches) across
+`ai_agents_mcp_workspace_root` (default `~/github`). No credentials needed. It registers as
+`ws` because Claude Code reserves the name `workspace`.
 
 ### Adding other servers
 
