@@ -1,0 +1,29 @@
+---
+# AGY reads lifecycle hooks from hooks.json in its Global Customizations Root.
+# Managed hook groups are merged in by name; groups with other names survive.
+# The guard-bash script speaks AGY's contract (JSON verdict on stdout) as well
+# as Claude Code's.
+
+- name: Ensure the AGY config directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.gemini/config"
+    state: directory
+    mode: "0755"
+
+- name: Read existing AGY hooks
+  ansible.builtin.slurp:
+    src: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/hooks.json"
+  register: ai_agents_agy_hooks_raw
+  failed_when: false
+
+- name: Merge the managed hook groups into hooks.json
+  vars:
+    existing: >-
+      {{ (ai_agents_agy_hooks_raw.content | b64decode | from_json)
+         if (ai_agents_agy_hooks_raw.content is defined
+             and (ai_agents_agy_hooks_raw.content | b64decode | trim) != '')
+         else {} }}
+  ansible.builtin.copy:
+    dest: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/hooks.json"
+    content: "{{ existing | combine(ai_agents_agy_hooks) | to_nice_json }}\n"
+    mode: "0644"

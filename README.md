@@ -52,6 +52,8 @@ file** (the role records only the path to your PEM). See [MCP Servers](#mcp-serv
 | `ai_agents_git_user_name` / `_email`        | `""`                                        | Optional global git identity matching the App's `[bot]` account                          |
 | `ai_agents_mcp_workspace_root`              | `~/github`                                  | Root the `workspace` MCP server surveys for git repos                                    |
 | `ai_agents_claude_permission_deny`          | `["Bash(gh)", "Bash(gh:*)"]`                | Deny rules merged into `~/.claude/settings.json` — keeps the `gh` CLI human-only         |
+| `ai_agents_claude_hooks`                    | guard-bash on `Bash`                        | Hooks merged into `~/.claude/settings.json` (pre-existing hook entries preserved)        |
+| `ai_agents_agy_hooks`                       | guard-bash on `run_command`                 | Named hook groups merged into `~/.gemini/config/hooks.json`                              |
 
 ## CLI Toolchain
 

@@ -71,7 +71,21 @@
         - "ai_agents:settings"
   when:
     - ai_agents_install['claude_code'] | bool
-    - ai_agents_claude_permission_deny | length > 0
+    - (ai_agents_claude_permission_deny | length > 0) or (ai_agents_claude_hooks | length > 0)
+  tags:
+    - ai_agents
+    - "ai_agents:settings"
+
+- name: Manage AGY lifecycle hooks
+  ansible.builtin.include_tasks:
+    file: config/agy_hooks.yml
+    apply:
+      tags:
+        - ai_agents
+        - "ai_agents:settings"
+  when:
+    - ai_agents_install['agy'] | bool
+    - ai_agents_agy_hooks | length > 0
   tags:
     - ai_agents
     - "ai_agents:settings"

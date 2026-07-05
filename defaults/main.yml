@@ -160,10 +160,34 @@ ai_agents_mcp_workspace_root: "{{ ansible_facts['env']['HOME'] }}/github"
 # keys are preserved). The gh entries enforce identity separation: agents do
 # GitHub work as the App through mcp-github (Hard Rule 8); the gh CLI remains
 # the human's own authenticated session. Note: a prefix deny cannot catch gh
-# nested inside compound commands — the AGENTS.md rule covers that layer.
+# nested inside compound commands — the guard-bash hook below covers that layer.
 ai_agents_claude_permission_deny:
   - "Bash(gh)"
   - "Bash(gh:*)"
+
+# Lifecycle hooks. guard-bash ships with the agent config repo and speaks both
+# hook contracts: it blocks gh anywhere in a shell command (compound commands
+# included) and pushes to main/master.
+ai_agents_hook_guard_bash: "{{ ai_agents_config_dest }}/hooks/guard-bash.sh"
+
+# Merged into ~/.claude/settings.json alongside the deny rules; pre-existing
+# hook entries are preserved.
+ai_agents_claude_hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: "command"
+          command: "{{ ai_agents_hook_guard_bash }}"
+
+# Written to AGY's Global Customizations Root as named hook groups
+# (~/.gemini/config/hooks.json); groups with other names are preserved.
+ai_agents_agy_hooks:
+  guard-bash:
+    PreToolUse:
+      - matcher: "run_command"
+        hooks:
+          - type: "command"
+            command: "{{ ai_agents_hook_guard_bash }}"
 
 # Enable write operations for the mcp-github server (merging PRs, creating issues, etc.)
 ai_agents_mcp_github_allow_write: true

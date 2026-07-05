@@ -59,9 +59,33 @@
         content: "pre-existing global config\n"
         mode: "0644"
 
-    # Pre-existing user settings must survive the deny-rule merge untouched.
+    # Pre-existing user settings must survive the deny-rule + hooks merge
+    # untouched, including a hook entry the role does not manage.
     - name: Pre-seed a real ~/.claude/settings.json
       ansible.builtin.copy:
         dest: "{{ ansible_facts['env']['HOME'] }}/.claude/settings.json"
-        content: "{{ {'theme': 'dark', 'permissions': {'allow': ['WebSearch']}} | to_nice_json }}\n"
+        content: >-
+          {{ {'theme': 'dark',
+              'permissions': {'allow': ['WebSearch']},
+              'hooks': {'PreToolUse': [
+                {'matcher': 'WebFetch',
+                 'hooks': [{'type': 'command', 'command': '/usr/local/bin/user-hook.sh'}]}]}}
+             | to_nice_json }}{{ '\n' }}
+        mode: "0644"
+
+    # An unmanaged AGY hook group must survive the hooks.json merge.
+    - name: Ensure ~/.gemini/config exists for the pre-seeded AGY hooks
+      ansible.builtin.file:
+        path: "{{ ansible_facts['env']['HOME'] }}/.gemini/config"
+        state: directory
+        mode: "0755"
+
+    - name: Pre-seed a real ~/.gemini/config/hooks.json
+      ansible.builtin.copy:
+        dest: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/hooks.json"
+        content: >-
+          {{ {'user-hook': {'PostToolUse': [
+                {'matcher': 'run_command',
+                 'hooks': [{'type': 'command', 'command': '/usr/local/bin/user-hook.sh'}]}]}}
+             | to_nice_json }}{{ '\n' }}
         mode: "0644"

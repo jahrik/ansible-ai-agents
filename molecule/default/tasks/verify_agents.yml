@@ -88,6 +88,32 @@
       - settings.theme == 'dark'
     fail_msg: "gh deny rules missing from settings.json, or the merge clobbered existing keys"
 
+- name: Assert the guard-bash hook was registered and the user's hook survived
+  vars:
+    settings: "{{ claude_settings.content | b64decode | from_json }}"
+    hook_commands: >-
+      {{ settings.hooks.PreToolUse | map(attribute='hooks') | flatten
+         | map(attribute='command') | list }}
+  ansible.builtin.assert:
+    that:
+      - hook_commands | select('search', 'guard-bash.sh') | length > 0
+      - "'/usr/local/bin/user-hook.sh' in hook_commands"
+    fail_msg: "guard-bash hook missing from settings.json, or the merge dropped the user's hook"
+
+- name: Read AGY hooks
+  ansible.builtin.slurp:
+    src: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/hooks.json"
+  register: agy_hooks
+- name: Assert the AGY guard-bash hook group was merged and the user's group survived
+  vars:
+    hooks: "{{ agy_hooks.content | b64decode | from_json }}"
+  ansible.builtin.assert:
+    that:
+      - "'guard-bash' in hooks"
+      - hooks['guard-bash'].PreToolUse[0].hooks[0].command is search('guard-bash.sh')
+      - "'user-hook' in hooks"
+    fail_msg: "AGY hooks.json is missing the managed group or dropped the user's group"
+
 # MCP servers
 - name: Read Claude Code config
   ansible.builtin.slurp:
