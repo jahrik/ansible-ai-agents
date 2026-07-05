@@ -1,0 +1,30 @@
+---
+# Merge managed permission deny rules into ~/.claude/settings.json without
+# touching the user's other settings (statusline, model, theme, …). The gh
+# deny enforces identity separation: agents act as the GitHub App through
+# mcp-github; the gh CLI stays the human's own session.
+
+- name: Read existing Claude Code settings
+  ansible.builtin.slurp:
+    src: "{{ ansible_facts['env']['HOME'] }}/.claude/settings.json"
+  register: ai_agents_claude_settings_raw
+  failed_when: false
+
+- name: Merge the managed deny rules into the settings
+  vars:
+    existing: >-
+      {{ (ai_agents_claude_settings_raw.content | b64decode | from_json)
+         if (ai_agents_claude_settings_raw.content is defined
+             and (ai_agents_claude_settings_raw.content | b64decode | trim) != '')
+         else {} }}
+    merged_deny: >-
+      {{ (existing.permissions | default({})).deny | default([])
+         | union(ai_agents_claude_permission_deny) }}
+    merged: >-
+      {{ existing
+         | combine({'permissions': (existing.permissions | default({}))
+                                   | combine({'deny': merged_deny})}) }}
+  ansible.builtin.copy:
+    dest: "{{ ansible_facts['env']['HOME'] }}/.claude/settings.json"
+    content: "{{ merged | to_nice_json }}\n"
+    mode: "0644"

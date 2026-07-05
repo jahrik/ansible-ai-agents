@@ -72,6 +72,22 @@
   ansible.builtin.assert:
     that: aider_conf.stat.exists
 
+# Permission settings
+- name: Read Claude Code settings
+  ansible.builtin.slurp:
+    src: "{{ ansible_facts['env']['HOME'] }}/.claude/settings.json"
+  register: claude_settings
+- name: Assert the gh deny rules were merged and existing settings survived
+  vars:
+    settings: "{{ claude_settings.content | b64decode | from_json }}"
+  ansible.builtin.assert:
+    that:
+      - "'Bash(gh)' in settings.permissions.deny"
+      - "'Bash(gh:*)' in settings.permissions.deny"
+      - "'WebSearch' in settings.permissions.allow"
+      - settings.theme == 'dark'
+    fail_msg: "gh deny rules missing from settings.json, or the merge clobbered existing keys"
+
 # MCP servers
 - name: Read Claude Code config
   ansible.builtin.slurp:

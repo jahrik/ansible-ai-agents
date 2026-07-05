@@ -58,3 +58,10 @@
         dest: "{{ ansible_facts['env']['HOME'] }}/.claude/CLAUDE.md"
         content: "pre-existing global config\n"
         mode: "0644"
+
+    # Pre-existing user settings must survive the deny-rule merge untouched.
+    - name: Pre-seed a real ~/.claude/settings.json
+      ansible.builtin.copy:
+        dest: "{{ ansible_facts['env']['HOME'] }}/.claude/settings.json"
+        content: "{{ {'theme': 'dark', 'permissions': {'allow': ['WebSearch']}} | to_nice_json }}\n"
+        mode: "0644"
