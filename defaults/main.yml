@@ -120,6 +120,7 @@ ai_agents_mcp_servers_source: "git+https://github.com/jahrik/mcp-servers"
 ai_agents_mcp_servers_upgrade: false
 ai_agents_uv_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/uv"
 ai_agents_mcp_github_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-github"
+ai_agents_mcp_workspace_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-workspace"
 
 # MCP servers to register with the enabled agents (Claude Code + AGY). Entries
 # are 'stdio' (command/args/env) or 'http' (url/headers). Never put a secret
@@ -134,6 +135,10 @@ ai_agents_mcp_github_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-git
 # registered and won't authenticate until GITHUB_APP_ID /
 # GITHUB_APP_INSTALLATION_ID / GITHUB_APP_PRIVATE_KEY reach its environment
 # some other way. See the README "MCP Servers" section.
+#
+# The `ws` server (mcp-workspace, same package) is read-only local git
+# surveying — no credentials, no writes. It scans ai_agents_mcp_workspace_root.
+# Registered as `ws` because Claude Code reserves the name "workspace".
 ai_agents_mcp_servers:
   - name: github
     type: stdio
@@ -141,6 +146,15 @@ ai_agents_mcp_servers:
     args: []
     env:
       MCP_GITHUB_ALLOW_WRITE: "{{ '1' if ai_agents_mcp_github_allow_write else '0' }}"
+  - name: ws
+    type: stdio
+    command: "{{ ai_agents_mcp_workspace_bin }}"
+    args: []
+    env:
+      MCP_WORKSPACE_ROOT: "{{ ai_agents_mcp_workspace_root }}"
+
+# Root directory the workspace server surveys for git repos.
+ai_agents_mcp_workspace_root: "{{ ansible_facts['env']['HOME'] }}/github"
 
 # Enable write operations for the mcp-github server (merging PRs, creating issues, etc.)
 ai_agents_mcp_github_allow_write: true

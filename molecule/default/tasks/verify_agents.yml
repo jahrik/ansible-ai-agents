@@ -77,28 +77,37 @@
   ansible.builtin.slurp:
     src: "{{ ansible_facts['env']['HOME'] }}/.claude.json"
   register: claude_config
-- name: Assert github MCP server registered with Claude Code
+- name: Assert github and ws MCP servers registered with Claude Code
   ansible.builtin.assert:
     that:
       - "'github' in (claude_config.content | b64decode | from_json).mcpServers"
-    fail_msg: "github MCP server was not registered with Claude Code"
+      - "'ws' in (claude_config.content | b64decode | from_json).mcpServers"
+    fail_msg: "github/ws MCP servers were not registered with Claude Code"
 
 - name: Read AGY MCP config
   ansible.builtin.slurp:
     src: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/mcp_config.json"
   register: agy_mcp_config
-- name: Assert github MCP server configured for AGY with a command
+- name: Assert github and ws MCP servers configured for AGY with commands
   ansible.builtin.assert:
     that:
       - "'github' in (agy_mcp_config.content | b64decode | from_json).mcpServers"
       - "(agy_mcp_config.content | b64decode | from_json).mcpServers.github.command is defined"
-    fail_msg: "github MCP server was not configured for AGY"
+      - "'ws' in (agy_mcp_config.content | b64decode | from_json).mcpServers"
+      - "(agy_mcp_config.content | b64decode | from_json).mcpServers.ws.command is defined"
+    fail_msg: "github/ws MCP servers were not configured for AGY"
 
-- name: Stat mcp-github binary
+- name: Stat the mcp-servers binaries
   ansible.builtin.stat:
-    path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-github"
-  register: mcp_github_bin
-- name: Assert mcp-github server binary is installed
+    path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/{{ item }}"
+  loop:
+    - mcp-github
+    - mcp-workspace
+  register: mcp_server_bins
+- name: Assert the mcp-servers binaries are installed
   ansible.builtin.assert:
-    that: mcp_github_bin.stat.exists
-    fail_msg: "mcp-github binary from the mcp-servers package was not installed"
+    that: item.stat.exists
+    fail_msg: "{{ item.item }} binary from the mcp-servers package was not installed"
+  loop: "{{ mcp_server_bins.results }}"
+  loop_control:
+    label: "{{ item.item }}"
