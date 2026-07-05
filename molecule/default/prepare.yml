@@ -70,7 +70,7 @@
               'hooks': {'PreToolUse': [
                 {'matcher': 'WebFetch',
                  'hooks': [{'type': 'command', 'command': '/usr/local/bin/user-hook.sh'}]}]}}
-             | to_nice_json }}{{ '\n' }}
+             | to_nice_json }}
         mode: "0644"
 
     # An unmanaged AGY hook group must survive the hooks.json merge.
@@ -87,5 +87,5 @@
           {{ {'user-hook': {'PostToolUse': [
                 {'matcher': 'run_command',
                  'hooks': [{'type': 'command', 'command': '/usr/local/bin/user-hook.sh'}]}]}}
-             | to_nice_json }}{{ '\n' }}
+             | to_nice_json }}
         mode: "0644"
