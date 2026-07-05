@@ -1,0 +1,36 @@
+---
+# Deploy the GitHub App identity for the mcp-github server: an env file with
+# the App/installation IDs plus the private key's *path*, and a wrapper that
+# exports the key content at launch. The role never writes the key anywhere —
+# the PEM stays where it already lives.
+
+- name: Check the GitHub App private key path
+  ansible.builtin.stat:
+    path: "{{ ai_agents_mcp_github_app_private_key_file }}"
+  register: ai_agents_github_app_key
+
+- name: Assert the GitHub App private key exists
+  ansible.builtin.assert:
+    that: ai_agents_github_app_key.stat.exists
+    fail_msg: >-
+      ai_agents_mcp_github_app_private_key_file points at
+      {{ ai_agents_mcp_github_app_private_key_file }}, which does not exist.
+      Place the GitHub App PEM there or fix the path.
+
+- name: Create the ai-agents config directory
+  ansible.builtin.file:
+    path: "{{ ai_agents_mcp_github_env_file | dirname }}"
+    state: directory
+    mode: "0700"
+
+- name: Write the GitHub App env file
+  ansible.builtin.template:
+    src: github-app.env.j2
+    dest: "{{ ai_agents_mcp_github_env_file }}"
+    mode: "0600"
+
+- name: Install the mcp-github wrapper
+  ansible.builtin.template:
+    src: mcp-github-app.sh.j2
+    dest: "{{ ai_agents_mcp_github_wrapper }}"
+    mode: "0755"

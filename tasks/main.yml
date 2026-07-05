@@ -62,6 +62,35 @@
     - ai_agents
     - "ai_agents:mcp_servers"
 
+- name: Deploy the GitHub App identity for mcp-github
+  ansible.builtin.include_tasks:
+    file: config/github_app.yml
+    apply:
+      tags:
+        - ai_agents
+        - "ai_agents:github_app"
+  when:
+    - ai_agents_mcp_github_app_id | length > 0
+    - ai_agents_mcp_github_app_installation_id | length > 0
+    - ai_agents_mcp_github_app_private_key_file | length > 0
+  tags:
+    - ai_agents
+    - "ai_agents:github_app"
+
+- name: Configure the git identity
+  ansible.builtin.include_tasks:
+    file: config/git_identity.yml
+    apply:
+      tags:
+        - ai_agents
+        - "ai_agents:git_identity"
+  when:
+    - ai_agents_git_user_name | length > 0
+    - ai_agents_git_user_email | length > 0
+  tags:
+    - ai_agents
+    - "ai_agents:git_identity"
+
 - name: Configure MCP servers
   ansible.builtin.include_tasks:
     file: config/mcp.yml

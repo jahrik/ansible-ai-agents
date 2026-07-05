@@ -14,3 +14,11 @@
           cursor: false
           cli_tools: true
           repo_sync: true
+        # Exercise the GitHub App identity + git identity paths (dummy PEM is
+        # created by prepare.yml; nothing here is a real credential).
+        ai_agents_mcp_github_app_id: "12345"
+        ai_agents_mcp_github_app_installation_id: "67890"
+        ai_agents_mcp_github_app_private_key_file: >-
+          {{ ansible_facts['env']['HOME'] }}/.ssh/molecule-dummy-app.pem
+        ai_agents_git_user_name: "molecule-bot[bot]"
+        ai_agents_git_user_email: "0+molecule-bot[bot]@users.noreply.github.com"

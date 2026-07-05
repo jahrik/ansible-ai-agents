@@ -25,6 +25,20 @@
           - unzip
         state: present
 
+    # Stand-in for the GitHub App PEM — the role only records its path and the
+    # wrapper reads it at launch, so placeholder content is enough.
+    - name: Create ~/.ssh for the dummy GitHub App key
+      ansible.builtin.file:
+        path: "{{ ansible_facts['env']['HOME'] }}/.ssh"
+        state: directory
+        mode: "0700"
+
+    - name: Create a dummy GitHub App private key
+      ansible.builtin.copy:
+        dest: "{{ ansible_facts['env']['HOME'] }}/.ssh/molecule-dummy-app.pem"
+        content: "molecule dummy key — not a real credential\n"
+        mode: "0600"
+
     # Simulate a machine that already has real Claude config, so the role's
     # backup-then-link path is exercised (a real directory and a real file).
     - name: Pre-seed a real ~/.claude/skills directory

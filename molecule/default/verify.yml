@@ -146,5 +146,60 @@
         - jq
       changed_when: false
 
+    - name: Stat the GitHub App env file
+      ansible.builtin.stat:
+        path: "{{ ansible_facts['env']['HOME'] }}/.config/ai-agents/github-app.env"
+      register: github_app_env
+
+    - name: Assert the env file exists with owner-only permissions
+      ansible.builtin.assert:
+        that:
+          - github_app_env.stat.exists
+          - github_app_env.stat.mode == '0600'
+        fail_msg: "github-app.env missing or not mode 0600"
+
+    - name: Read the GitHub App env file
+      ansible.builtin.slurp:
+        src: "{{ ansible_facts['env']['HOME'] }}/.config/ai-agents/github-app.env"
+      register: github_app_env_content
+
+    - name: Assert the env file records the identity but never key material
+      vars:
+        env_text: "{{ github_app_env_content.content | b64decode }}"
+      ansible.builtin.assert:
+        that:
+          - "'GITHUB_APP_ID=12345' in env_text"
+          - "'GITHUB_APP_INSTALLATION_ID=67890' in env_text"
+          - "'molecule-dummy-app.pem' in env_text"
+          - "'molecule dummy key' not in env_text"
+        fail_msg: "github-app.env is missing the App identity or contains key content"
+
+    - name: Stat the mcp-github wrapper
+      ansible.builtin.stat:
+        path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-github-app"
+      register: github_app_wrapper
+
+    - name: Assert the wrapper is installed and executable
+      ansible.builtin.assert:
+        that:
+          - github_app_wrapper.stat.exists
+          - github_app_wrapper.stat.executable
+        fail_msg: "mcp-github-app wrapper was not installed to ~/.local/bin"
+
+    - name: Read the global git identity
+      ansible.builtin.command: git config --global --get {{ item }}
+      loop:
+        - user.name
+        - user.email
+      register: git_identity
+      changed_when: false
+
+    - name: Assert the git identity matches the bot account
+      ansible.builtin.assert:
+        that:
+          - git_identity.results[0].stdout == 'molecule-bot[bot]'
+          - git_identity.results[1].stdout == '0+molecule-bot[bot]@users.noreply.github.com'
+        fail_msg: "global git identity was not set to the bot account"
+
     - name: Verify installed agents and their config wiring
       ansible.builtin.include_tasks: tasks/verify_agents.yml

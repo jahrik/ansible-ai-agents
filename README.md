@@ -17,34 +17,39 @@ symlinks it into each tool:
 It also registers shared **MCP (Model Context Protocol) servers** with the agents that
 support them — Claude Code (user scope, via `claude mcp add-json`) and AGY/Antigravity
 (`~/.gemini/config/mcp_config.json`). The default is a **`github`** server from the
-[`mcp-servers`](https://github.com/jahrik/mcp-servers) package; it shells out to the `gh`
-CLI, so it **reuses your existing `gh auth login` session — no token, no secret in any
-file**. See [MCP Servers](#mcp-servers).
+[`mcp-servers`](https://github.com/jahrik/mcp-servers) package; it authenticates as a
+**GitHub App** — writes land as `your-app[bot]`, and **no secret is written to any config
+file** (the role records only the path to your PEM). See [MCP Servers](#mcp-servers).
 
 ## Requirements
 
 - Ansible 2.16+
 - `git` on target host (to clone the agent-config repo)
-- For the default `github` MCP server: the [`gh` CLI](https://cli.github.com/) installed and
-  authenticated (`gh auth login`). The role installs the server but can't run the
-  interactive login.
+- For the default `github` MCP server: a GitHub App (create one at
+  _Settings → Developer settings → GitHub Apps_, install it on your repos) and its
+  private-key PEM on the target host. The role deploys the identity; it can't create
+  the App for you.
 
 ## Role Variables
 
-| Variable                        | Default                                     | Description                                                                              |
-| ------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `ai_agents_config_repo`         | `https://github.com/jahrik/agent-config`    | Git URL of your agent config repo                                                        |
-| `ai_agents_config_ref`          | `main`                                      | Branch or tag to check out                                                               |
-| `ai_agents_config_dest`         | `~/.config/agents`                          | Where the config repo is cloned                                                          |
-| `ai_agents_install.agy`         | `true`                                      | Install AGY (Antigravity CLI)                                                            |
-| `ai_agents_install.claude_code` | `true`                                      | Install Claude Code CLI                                                                  |
-| `ai_agents_install.aider`       | `false`                                     | Install Aider CLI                                                                        |
-| `ai_agents_install.codex`       | `false`                                     | Install Codex CLI                                                                        |
-| `ai_agents_install.cursor`      | `false`                                     | Install Cursor — _planned, not yet implemented_                                          |
-| `ai_agents_mcp_servers`         | list (`github` on by default)               | MCP servers to wire into Claude Code + AGY                                               |
-| `ai_agents_mcp_servers_install` | `true`                                      | Install the `mcp-servers` package (`uv tool`)                                            |
-| `ai_agents_mcp_servers_source`  | `git+https://github.com/jahrik/mcp-servers` | Source `uv tool install` pulls the package from                                          |
-| `ai_agents_mcp_servers_upgrade` | `false`                                     | Force-reinstall `mcp-servers` to pull the latest commit (install is otherwise once-only) |
+| Variable                                    | Default                                     | Description                                                                              |
+| ------------------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `ai_agents_config_repo`                     | `https://github.com/jahrik/agent-config`    | Git URL of your agent config repo                                                        |
+| `ai_agents_config_ref`                      | `main`                                      | Branch or tag to check out                                                               |
+| `ai_agents_config_dest`                     | `~/.config/agents`                          | Where the config repo is cloned                                                          |
+| `ai_agents_install.agy`                     | `true`                                      | Install AGY (Antigravity CLI)                                                            |
+| `ai_agents_install.claude_code`             | `true`                                      | Install Claude Code CLI                                                                  |
+| `ai_agents_install.aider`                   | `false`                                     | Install Aider CLI                                                                        |
+| `ai_agents_install.codex`                   | `false`                                     | Install Codex CLI                                                                        |
+| `ai_agents_install.cursor`                  | `false`                                     | Install Cursor — _planned, not yet implemented_                                          |
+| `ai_agents_mcp_servers`                     | list (`github` on by default)               | MCP servers to wire into Claude Code + AGY                                               |
+| `ai_agents_mcp_servers_install`             | `true`                                      | Install the `mcp-servers` package (`uv tool`)                                            |
+| `ai_agents_mcp_servers_source`              | `git+https://github.com/jahrik/mcp-servers` | Source `uv tool install` pulls the package from                                          |
+| `ai_agents_mcp_servers_upgrade`             | `false`                                     | Force-reinstall `mcp-servers` to pull the latest commit (install is otherwise once-only) |
+| `ai_agents_mcp_github_app_id`               | `""`                                        | GitHub App ID for mcp-github (set all three `_app_*` vars to enable App auth)            |
+| `ai_agents_mcp_github_app_installation_id`  | `""`                                        | GitHub App installation ID                                                               |
+| `ai_agents_mcp_github_app_private_key_file` | `""`                                        | Path to the App's private-key PEM (path only — the key is never copied anywhere)         |
+| `ai_agents_git_user_name` / `_email`        | `""`                                        | Optional global git identity matching the App's `[bot]` account                          |
 
 ## CLI Toolchain
 
@@ -66,21 +71,25 @@ The role is idempotent — it skips downloads if the binary already exists. To u
 supports them. Each entry is either a local (`type: stdio`) or remote (`type: http`)
 server. The default is **`github`**, from the
 [`mcp-servers`](https://github.com/jahrik/mcp-servers) package — a local stdio server that
-shells out to the `gh` CLI, so it reuses your existing `gh auth login` session with **no
-token and no secret in any file**:
+authenticates as a **GitHub App**. Point the role at your App's identity:
 
 ```yaml
-ai_agents_mcp_servers:
-  - name: github
-    type: stdio
-    command: "{{ ai_agents_mcp_github_bin }}" # ~/.local/bin/mcp-github
-    args: []
+ai_agents_mcp_github_app_id: "123456"
+ai_agents_mcp_github_app_installation_id: "654321"
+ai_agents_mcp_github_app_private_key_file: "{{ ansible_env.HOME }}/.ssh/my-app.private-key.pem"
 ```
 
+The App ID and installation ID are not secrets, and the private key **stays in the PEM
+where it already lives** — the role writes only its _path_ into
+`~/.config/ai-agents/github-app.env` (mode `0600`) and registers the server through a
+`~/.local/bin/mcp-github-app` wrapper that exports the key at launch. No agent config
+file ever holds the key. Optionally set `ai_agents_git_user_name` /
+`ai_agents_git_user_email` so local commits match the App's `[bot]` identity.
+
 The role installs the package with `uv tool install` (bootstrapping `uv` if needed); set
-`ai_agents_mcp_servers_install: false` to skip that. **Prerequisite:** the `gh` CLI must be
-installed and authenticated (`gh auth login`) for the server to connect — the role
-registers it either way, so it simply reports `Failed to connect` until `gh` is set up.
+`ai_agents_mcp_servers_install: false` to skip that. Leave the `ai_agents_mcp_github_app_*`
+vars unset and the bare server is registered anyway — it just can't authenticate until the
+`GITHUB_APP_*` env vars reach it some other way.
 
 ### Adding other servers
 
