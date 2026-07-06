@@ -46,7 +46,7 @@ engine), and **`dispatcher`** (async agent-to-agent task delegation). See [MCP S
 | `ai_agents_install.cursor`                  | `false`                                             | Install Cursor — _planned, not yet implemented_                                          |
 | `ai_agents_mcp_servers`                     | list (`github`/`ws`/`data`/`dispatcher` by default) | MCP servers to wire into Claude Code + AGY                                               |
 | `ai_agents_mcp_servers_install`             | `true`                                              | Install the `mcp-servers` package (`uv tool`)                                            |
-| `ai_agents_mcp_servers_source`              | `git+https://github.com/jahrik/mcp-servers@v0.3.0`  | Source `uv tool install` pulls the package from                                          |
+| `ai_agents_mcp_servers_source`              | `git+https://github.com/jahrik/mcp-servers`         | Source `uv tool install` pulls the package from                                          |
 | `ai_agents_mcp_servers_upgrade`             | `false`                                             | Force-reinstall `mcp-servers` to pull the latest commit (install is otherwise once-only) |
 | `ai_agents_mcp_github_app_id`               | `""`                                                | GitHub App ID for mcp-github (set all three `_app_*` vars to enable App auth)            |
 | `ai_agents_mcp_github_app_installation_id`  | `""`                                                | GitHub App installation ID                                                               |
