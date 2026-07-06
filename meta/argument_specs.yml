@@ -44,6 +44,31 @@ argument_specs:
             args: []
             env:
               MCP_GITHUB_ALLOW_WRITE: "{{ '1' if ai_agents_mcp_github_allow_write else '0' }}"
+          - name: ws
+            type: stdio
+            command: "{{ ai_agents_mcp_workspace_bin }}"
+            args: []
+            env:
+              MCP_WORKSPACE_ROOT: "{{ ai_agents_mcp_workspace_root }}"
+          - name: data
+            type: stdio
+            command: "{{ ai_agents_mcp_data_bin }}"
+            args: []
+            env: {}
+          - name: dispatcher
+            type: stdio
+            command: "{{ ai_agents_mcp_dispatcher_bin }}"
+            args: []
+            env:
+              MCP_DISPATCHER_ALLOW_SPAWN: "1"
+              MCP_DISPATCHER_DB_PATH: "{{ ai_agents_mcp_dispatcher_db_path }}"
+          - name: lsp
+            type: stdio
+            command: "{{ ai_agents_mcp_lsp_bin }}"
+            args: []
+            env:
+              MCP_LSP_COMMAND: "{{ ai_agents_mcp_lsp_command }}"
+              MCP_LSP_ROOT: "{{ ai_agents_mcp_workspace_root }}"
       ai_agents_mcp_github_allow_write:
         type: bool
         description: >-

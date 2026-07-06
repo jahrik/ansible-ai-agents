@@ -122,6 +122,8 @@ ai_agents_mcp_github_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-git
 ai_agents_mcp_workspace_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-workspace"
 ai_agents_mcp_data_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-data"
 ai_agents_mcp_dispatcher_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-dispatcher"
+ai_agents_mcp_lsp_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-lsp"
+ai_agents_mcp_lsp_command: "pyright-langserver --stdio"
 # Keep the runtime DB out of the agent-config git clone (~/.config/agents),
 # where an untracked dispatcher.db risks being committed or wiped on re-clone.
 # ~/.mcp is the server's own safe default and sits alongside the github audit.db.
@@ -153,6 +155,11 @@ ai_agents_mcp_dispatcher_db_path: "{{ ansible_facts['env']['HOME'] }}/.mcp/dispa
 # The `dispatcher` server (mcp-dispatcher, same package) manages job state
 # in an SQLite database and asynchronously spawns subagents to handle them.
 # The server can spawn subprocesses when MCP_DISPATCHER_ALLOW_SPAWN is set to 1.
+#
+# The `lsp` server (mcp-lsp, same package) proxies language intelligence
+# requests to an external LSP server. By default it uses pyright-langserver,
+# which MUST be installed externally by the user (e.g. via npm install -g pyright)
+# or the command overridden via ai_agents_mcp_lsp_command.
 ai_agents_mcp_servers:
   - name: github
     type: stdio
@@ -178,6 +185,13 @@ ai_agents_mcp_servers:
     env:
       MCP_DISPATCHER_ALLOW_SPAWN: "1"
       MCP_DISPATCHER_DB_PATH: "{{ ai_agents_mcp_dispatcher_db_path }}"
+  - name: lsp
+    type: stdio
+    command: "{{ ai_agents_mcp_lsp_bin }}"
+    args: []
+    env:
+      MCP_LSP_COMMAND: "{{ ai_agents_mcp_lsp_command }}"
+      MCP_LSP_ROOT: "{{ ai_agents_mcp_workspace_root }}"
 
 # Root directory the workspace server surveys for git repos.
 ai_agents_mcp_workspace_root: "{{ ansible_facts['env']['HOME'] }}/github"
