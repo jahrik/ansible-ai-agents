@@ -10,7 +10,6 @@
           agy: true
           claude_code: true
           aider: true
-          codex: true
           cursor: false
           cli_tools: true
           repo_sync: true

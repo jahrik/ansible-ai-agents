@@ -4,7 +4,6 @@ ai_agents_install:
   agy: true
   claude_code: true
   aider: false
-  codex: false
   cursor: false
   cli_tools: true
   repo_sync: true
