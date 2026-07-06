@@ -121,6 +121,7 @@ ai_agents_mcp_servers_upgrade: false
 ai_agents_uv_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/uv"
 ai_agents_mcp_github_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-github"
 ai_agents_mcp_workspace_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-workspace"
+ai_agents_mcp_data_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-data"
 
 # MCP servers to register with the enabled agents (Claude Code + AGY). Entries
 # are 'stdio' (command/args/env) or 'http' (url/headers). Never put a secret
@@ -139,6 +140,11 @@ ai_agents_mcp_workspace_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-
 # The `ws` server (mcp-workspace, same package) is read-only local git
 # surveying — no credentials, no writes. It scans ai_agents_mcp_workspace_root.
 # Registered as `ws` because Claude Code reserves the name "workspace".
+#
+# The `data` server (mcp-data, same package) runs SQL over large local files
+# and keeps scratch tables across tool calls (DuckDB engine, duckdb_* tools).
+# Local-only, no credentials. Limits are tunable via MCP_DATA_MAX_CHARS /
+# MCP_DATA_QUERY_TIMEOUT / MCP_DUCKDB_MEMORY_LIMIT (defaults are sensible).
 ai_agents_mcp_servers:
   - name: github
     type: stdio
@@ -152,6 +158,11 @@ ai_agents_mcp_servers:
     args: []
     env:
       MCP_WORKSPACE_ROOT: "{{ ai_agents_mcp_workspace_root }}"
+  - name: data
+    type: stdio
+    command: "{{ ai_agents_mcp_data_bin }}"
+    args: []
+    env: {}
 
 # Root directory the workspace server surveys for git repos.
 ai_agents_mcp_workspace_root: "{{ ansible_facts['env']['HOME'] }}/github"

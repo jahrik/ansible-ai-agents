@@ -16,10 +16,12 @@ symlinks it into each tool:
 
 It also registers shared **MCP (Model Context Protocol) servers** with the agents that
 support them — Claude Code (user scope, via `claude mcp add-json`) and AGY/Antigravity
-(`~/.gemini/config/mcp_config.json`). The default is a **`github`** server from the
-[`mcp-servers`](https://github.com/jahrik/mcp-servers) package; it authenticates as a
-**GitHub App** — writes land as `your-app[bot]`, and **no secret is written to any config
-file** (the role records only the path to your PEM). See [MCP Servers](#mcp-servers).
+(`~/.gemini/config/mcp_config.json`). The defaults come from the
+[`mcp-servers`](https://github.com/jahrik/mcp-servers) package: **`github`** (authenticates
+as a **GitHub App** — writes land as `your-app[bot]`, and **no secret is written to any
+config file**; the role records only the path to your PEM), **`ws`** (read-only local git
+workspace surveys), and **`data`** (SQL over large local files + scratch tables, DuckDB
+engine). See [MCP Servers](#mcp-servers).
 
 ## Requirements
 
@@ -42,7 +44,7 @@ file** (the role records only the path to your PEM). See [MCP Servers](#mcp-serv
 | `ai_agents_install.aider`                   | `false`                                     | Install Aider CLI                                                                        |
 | `ai_agents_install.codex`                   | `false`                                     | Install Codex CLI                                                                        |
 | `ai_agents_install.cursor`                  | `false`                                     | Install Cursor — _planned, not yet implemented_                                          |
-| `ai_agents_mcp_servers`                     | list (`github` on by default)               | MCP servers to wire into Claude Code + AGY                                               |
+| `ai_agents_mcp_servers`                     | list (`github`/`ws`/`data` by default)      | MCP servers to wire into Claude Code + AGY                                               |
 | `ai_agents_mcp_servers_install`             | `true`                                      | Install the `mcp-servers` package (`uv tool`)                                            |
 | `ai_agents_mcp_servers_source`              | `git+https://github.com/jahrik/mcp-servers` | Source `uv tool install` pulls the package from                                          |
 | `ai_agents_mcp_servers_upgrade`             | `false`                                     | Force-reinstall `mcp-servers` to pull the latest commit (install is otherwise once-only) |
