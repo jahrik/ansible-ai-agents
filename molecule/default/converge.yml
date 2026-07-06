@@ -9,8 +9,6 @@
         ai_agents_install:
           agy: true
           claude_code: true
-          aider: true
-          cursor: false
           cli_tools: true
           repo_sync: true
         # Exercise the GitHub App identity + git identity paths (dummy PEM is

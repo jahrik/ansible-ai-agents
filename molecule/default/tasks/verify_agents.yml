@@ -32,30 +32,6 @@
   ansible.builtin.assert:
     that: "'claude' in claude_version.stdout | lower"
 
-- name: Stat aider binary
-  ansible.builtin.stat:
-    path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/aider"
-  register: aider_bin
-- name: Assert aider is installed
-  ansible.builtin.assert:
-    that: aider_bin.stat.exists
-
-- name: Run aider --version
-  ansible.builtin.command: "{{ ansible_facts['env']['HOME'] }}/.local/bin/aider --version"
-  register: aider_version
-  changed_when: false
-- name: Assert aider version output
-  ansible.builtin.assert:
-    that: "'aider' in aider_version.stdout | lower"
-
-- name: Stat aider config file
-  ansible.builtin.stat:
-    path: "{{ ansible_facts['env']['HOME'] }}/.aider.conf.yml"
-  register: aider_conf
-- name: Assert aider config file exists
-  ansible.builtin.assert:
-    that: aider_conf.stat.exists
-
 # Permission settings
 - name: Read Claude Code settings
   ansible.builtin.slurp:
