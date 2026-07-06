@@ -19,3 +19,8 @@
     version: "{{ ai_agents_config_ref }}"
     update: true
     force: false
+
+- name: Ensure guard-bash hook is executable
+  ansible.builtin.file:
+    path: "{{ ai_agents_hook_guard_bash }}"
+    mode: "0755"
