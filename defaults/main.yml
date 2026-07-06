@@ -122,6 +122,8 @@ ai_agents_uv_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/uv"
 ai_agents_mcp_github_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-github"
 ai_agents_mcp_workspace_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-workspace"
 ai_agents_mcp_data_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-data"
+ai_agents_mcp_dispatcher_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-dispatcher"
+ai_agents_mcp_dispatcher_db_path: "{{ ansible_facts['env']['HOME'] }}/.config/agents/dispatcher.db"
 
 # MCP servers to register with the enabled agents (Claude Code + AGY). Entries
 # are 'stdio' (command/args/env) or 'http' (url/headers). Never put a secret
@@ -145,6 +147,10 @@ ai_agents_mcp_data_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-data"
 # and keeps scratch tables across tool calls (DuckDB engine, duckdb_* tools).
 # Local-only, no credentials. Limits are tunable via MCP_DATA_MAX_CHARS /
 # MCP_DATA_QUERY_TIMEOUT / MCP_DUCKDB_MEMORY_LIMIT (defaults are sensible).
+#
+# The `dispatcher` server (mcp-dispatcher, same package) manages job state
+# in an SQLite database and asynchronously spawns subagents to handle them.
+# The server can spawn subprocesses when MCP_DISPATCHER_ALLOW_SPAWN is set to 1.
 ai_agents_mcp_servers:
   - name: github
     type: stdio
@@ -163,6 +169,13 @@ ai_agents_mcp_servers:
     command: "{{ ai_agents_mcp_data_bin }}"
     args: []
     env: {}
+  - name: dispatcher
+    type: stdio
+    command: "{{ ai_agents_mcp_dispatcher_bin }}"
+    args: []
+    env:
+      MCP_DISPATCHER_ALLOW_SPAWN: "1"
+      MCP_DISPATCHER_DB_PATH: "{{ ai_agents_mcp_dispatcher_db_path }}"
 
 # Root directory the workspace server surveys for git repos.
 ai_agents_mcp_workspace_root: "{{ ansible_facts['env']['HOME'] }}/github"
