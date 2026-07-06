@@ -32,46 +32,6 @@
   ansible.builtin.assert:
     that: "'claude' in claude_version.stdout | lower"
 
-- name: Stat aider binary
-  ansible.builtin.stat:
-    path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/aider"
-  register: aider_bin
-- name: Assert aider is installed
-  ansible.builtin.assert:
-    that: aider_bin.stat.exists
-
-- name: Run aider --version
-  ansible.builtin.command: "{{ ansible_facts['env']['HOME'] }}/.local/bin/aider --version"
-  register: aider_version
-  changed_when: false
-- name: Assert aider version output
-  ansible.builtin.assert:
-    that: "'aider' in aider_version.stdout | lower"
-
-- name: Stat codex binary
-  ansible.builtin.stat:
-    path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/codex"
-  register: codex_bin
-- name: Assert codex is installed
-  ansible.builtin.assert:
-    that: codex_bin.stat.exists
-
-- name: Run codex --version
-  ansible.builtin.command: "{{ ansible_facts['env']['HOME'] }}/.local/bin/codex --version"
-  register: codex_version
-  changed_when: false
-- name: Assert codex version output
-  ansible.builtin.assert:
-    that: "'codex' in codex_version.stdout | lower"
-
-- name: Stat aider config file
-  ansible.builtin.stat:
-    path: "{{ ansible_facts['env']['HOME'] }}/.aider.conf.yml"
-  register: aider_conf
-- name: Assert aider config file exists
-  ansible.builtin.assert:
-    that: aider_conf.stat.exists
-
 # Permission settings
 - name: Read Claude Code settings
   ansible.builtin.slurp:

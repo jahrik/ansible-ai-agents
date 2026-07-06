@@ -5,14 +5,13 @@
 
 Ansible role to install and configure AI coding agents across Linux and macOS environments.
 
-Installs agents (AGY/Antigravity, Claude Code, Aider, Codex CLI) and wires up a pluggable
+Installs agents (AGY/Antigravity, Claude Code) and wires up a pluggable
 **agent-config repo** — a separate repository of `AGENTS.md` rules, skills, and
 subagents that all agents read. It clones the config to `~/.config/agents/` and
 symlinks it into each tool:
 
 - **Claude Code** — `AGENTS.md` → `~/.claude/CLAUDE.md`, `skills/` → `~/.claude/skills`, `agents/` → `~/.claude/agents`
 - **AGY/Antigravity** — `AGENTS.md` → `~/.gemini/config/AGENTS.md`, `skills/` → `~/.gemini/config/skills`, `agents/` → `~/.gemini/config/agents`
-- **Aider** — generates `~/.aider.conf.yml` to read `~/.config/agents/AGENTS.md`
 
 It also registers shared **MCP (Model Context Protocol) servers** with the agents that
 support them — Claude Code (user scope, via `claude mcp add-json`) and AGY/Antigravity
@@ -41,12 +40,9 @@ engine), and **`dispatcher`** (async agent-to-agent task delegation). See [MCP S
 | `ai_agents_config_dest`                     | `~/.config/agents`                                  | Where the config repo is cloned                                                          |
 | `ai_agents_install.agy`                     | `true`                                              | Install AGY (Antigravity CLI)                                                            |
 | `ai_agents_install.claude_code`             | `true`                                              | Install Claude Code CLI                                                                  |
-| `ai_agents_install.aider`                   | `false`                                             | Install Aider CLI                                                                        |
-| `ai_agents_install.codex`                   | `false`                                             | Install Codex CLI                                                                        |
-| `ai_agents_install.cursor`                  | `false`                                             | Install Cursor — _planned, not yet implemented_                                          |
 | `ai_agents_mcp_servers`                     | list (`github`/`ws`/`data`/`dispatcher` by default) | MCP servers to wire into Claude Code + AGY                                               |
 | `ai_agents_mcp_servers_install`             | `true`                                              | Install the `mcp-servers` package (`uv tool`)                                            |
-| `ai_agents_mcp_servers_source`              | `git+https://github.com/jahrik/mcp-servers@v0.3.0`  | Source `uv tool install` pulls the package from                                          |
+| `ai_agents_mcp_servers_source`              | `git+https://github.com/jahrik/mcp-servers`         | Source `uv tool install` pulls the package from                                          |
 | `ai_agents_mcp_servers_upgrade`             | `false`                                             | Force-reinstall `mcp-servers` to pull the latest commit (install is otherwise once-only) |
 | `ai_agents_mcp_github_app_id`               | `""`                                                | GitHub App ID for mcp-github (set all three `_app_*` vars to enable App auth)            |
 | `ai_agents_mcp_github_app_installation_id`  | `""`                                                | GitHub App installation ID                                                               |
@@ -175,9 +171,6 @@ agent-config/
         ai_agents_install:
           agy: true
           claude_code: true
-          aider: false
-          codex: false
-          cursor: false
 ```
 
 ## Composing with another role

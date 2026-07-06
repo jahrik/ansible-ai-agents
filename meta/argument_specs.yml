@@ -9,9 +9,6 @@ argument_specs:
         default:
           agy: true
           claude_code: true
-          aider: false
-          codex: false
-          cursor: false
       ai_agents_claude_bin:
         type: str
         description: Claude Code CLI path, used to register MCP servers via `claude mcp add-json`
