@@ -120,7 +120,10 @@ ai_agents_mcp_github_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-git
 ai_agents_mcp_workspace_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-workspace"
 ai_agents_mcp_data_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-data"
 ai_agents_mcp_dispatcher_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-dispatcher"
-ai_agents_mcp_dispatcher_db_path: "{{ ansible_facts['env']['HOME'] }}/.config/agents/dispatcher.db"
+# Keep the runtime DB out of the agent-config git clone (~/.config/agents),
+# where an untracked dispatcher.db risks being committed or wiped on re-clone.
+# ~/.mcp is the server's own safe default and sits alongside the github audit.db.
+ai_agents_mcp_dispatcher_db_path: "{{ ansible_facts['env']['HOME'] }}/.mcp/dispatcher.db"
 
 # MCP servers to register with the enabled agents (Claude Code + AGY). Entries
 # are 'stdio' (command/args/env) or 'http' (url/headers). Never put a secret
