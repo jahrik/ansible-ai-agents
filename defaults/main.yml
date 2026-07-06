@@ -4,7 +4,12 @@ ai_agents_install:
   agy: true
   claude_code: true
   cli_tools: true
+  npm_tools: true
   repo_sync: true
+
+# Global npm packages to install (e.g. language servers)
+ai_agents_npm_tools:
+  - pyright
 
 # Where standalone binaries land (no root needed; works on immutable rootfs)
 ai_agents_bin_dir: "{{ ansible_facts['env']['HOME'] }}/.local/bin"
