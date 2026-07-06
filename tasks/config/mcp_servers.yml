@@ -64,3 +64,13 @@
   when:
     - ai_agents_mcp_servers | selectattr('name', 'equalto', 'github') | list | length > 0
     - not ai_agents_mcp_github_app_configured | bool
+
+# Always install the wrapper: it is the registered github command whether or
+# not the App identity is configured. It sources the identity when the env file
+# exists (written by github_app.yml) and execs the bare server otherwise, so the
+# registered command never flips back to the unauthenticated binary between runs.
+- name: Install the mcp-github wrapper
+  ansible.builtin.template:
+    src: mcp-github-app.sh.j2
+    dest: "{{ ai_agents_mcp_github_wrapper }}"
+    mode: "0755"
