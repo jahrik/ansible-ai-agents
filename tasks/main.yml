@@ -62,6 +62,34 @@
     - ai_agents
     - "ai_agents:mcp_servers"
 
+- name: Manage Claude Code permission settings
+  ansible.builtin.include_tasks:
+    file: config/claude_settings.yml
+    apply:
+      tags:
+        - ai_agents
+        - "ai_agents:settings"
+  when:
+    - ai_agents_install['claude_code'] | bool
+    - (ai_agents_claude_permission_deny | length > 0) or (ai_agents_claude_hooks | length > 0)
+  tags:
+    - ai_agents
+    - "ai_agents:settings"
+
+- name: Manage AGY lifecycle hooks
+  ansible.builtin.include_tasks:
+    file: config/agy_hooks.yml
+    apply:
+      tags:
+        - ai_agents
+        - "ai_agents:settings"
+  when:
+    - ai_agents_install['agy'] | bool
+    - ai_agents_agy_hooks | length > 0
+  tags:
+    - ai_agents
+    - "ai_agents:settings"
+
 - name: Deploy the GitHub App identity for mcp-github
   ansible.builtin.include_tasks:
     file: config/github_app.yml
