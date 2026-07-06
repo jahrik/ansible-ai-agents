@@ -40,15 +40,18 @@
   args:
     creates: "{{ ai_agents_mcp_github_bin }}"
 
-# Opt-in force-reinstall to pull the latest commit (the install above is
-# once-only). uv prints "Installed" only when it actually reinstalls.
+# Upgrade to the latest source ref (the install above is once-only, so it would
+# otherwise freeze at whatever commit was current at first install). `uv tool
+# upgrade` re-resolves the git ref and only reinstalls on a real change — it
+# prints "Updated X -> Y" then, and "Nothing to upgrade" otherwise, so this is
+# idempotent. On by default; set ai_agents_mcp_servers_upgrade=false to pin.
 - name: Upgrade the mcp-servers package to the latest source ref
   ansible.builtin.command:
-    cmd: "{{ ai_agents_uv_bin }} tool install --force {{ ai_agents_mcp_servers_source }}"
+    cmd: "{{ ai_agents_uv_bin }} tool upgrade mcp-servers"
   register: ai_agents_mcp_upgrade
   changed_when: >-
-    'Installed' in (ai_agents_mcp_upgrade.stdout | default(''))
-    or 'Installed' in (ai_agents_mcp_upgrade.stderr | default(''))
+    'Updated' in (ai_agents_mcp_upgrade.stdout | default(''))
+    or 'Updated' in (ai_agents_mcp_upgrade.stderr | default(''))
   when: ai_agents_mcp_servers_upgrade | bool
 
 # The github server authenticates as a GitHub App. Registration succeeds
