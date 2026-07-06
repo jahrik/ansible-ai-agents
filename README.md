@@ -20,7 +20,7 @@ support them — Claude Code (user scope, via `claude mcp add-json`) and AGY/Ant
 as a **GitHub App** — writes land as `your-app[bot]`, and **no secret is written to any
 config file**; the role records only the path to your PEM), **`ws`** (read-only local git
 workspace surveys), **`data`** (SQL over large local files + scratch tables, DuckDB
-engine), and **`dispatcher`** (async agent-to-agent task delegation). See [MCP Servers](#mcp-servers).
+engine), **`dispatcher`** (async agent-to-agent task delegation), and **`lsp`** (language server proxy). See [MCP Servers](#mcp-servers).
 
 ## Requirements
 
@@ -40,7 +40,7 @@ engine), and **`dispatcher`** (async agent-to-agent task delegation). See [MCP S
 | `ai_agents_config_dest`                     | `~/.config/agents`                                  | Where the config repo is cloned                                                                                                    |
 | `ai_agents_install.agy`                     | `true`                                              | Install AGY (Antigravity CLI)                                                                                                      |
 | `ai_agents_install.claude_code`             | `true`                                              | Install Claude Code CLI                                                                                                            |
-| `ai_agents_mcp_servers`                     | list (`github`/`ws`/`data`/`dispatcher` by default) | MCP servers to wire into Claude Code + AGY                                                                                         |
+| `ai_agents_mcp_servers`                     | list (`github`/`ws`/`data`/`dispatcher`/`lsp` by default) | MCP servers to wire into Claude Code + AGY                                                                                         |
 | `ai_agents_mcp_servers_install`             | `true`                                              | Install the `mcp-servers` package (`uv tool`)                                                                                      |
 | `ai_agents_mcp_servers_source`              | `git+https://github.com/jahrik/mcp-servers`         | Source `uv tool install` pulls the package from                                                                                    |
 | `ai_agents_mcp_servers_upgrade`             | `true`                                              | Upgrade `mcp-servers` to the latest source ref on every run (`uv tool upgrade`, idempotent); set false to pin the installed commit |
