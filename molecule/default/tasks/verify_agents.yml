@@ -48,22 +48,6 @@
   ansible.builtin.assert:
     that: "'aider' in aider_version.stdout | lower"
 
-- name: Stat codex binary
-  ansible.builtin.stat:
-    path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/codex"
-  register: codex_bin
-- name: Assert codex is installed
-  ansible.builtin.assert:
-    that: codex_bin.stat.exists
-
-- name: Run codex --version
-  ansible.builtin.command: "{{ ansible_facts['env']['HOME'] }}/.local/bin/codex --version"
-  register: codex_version
-  changed_when: false
-- name: Assert codex version output
-  ansible.builtin.assert:
-    that: "'codex' in codex_version.stdout | lower"
-
 - name: Stat aider config file
   ansible.builtin.stat:
     path: "{{ ansible_facts['env']['HOME'] }}/.aider.conf.yml"

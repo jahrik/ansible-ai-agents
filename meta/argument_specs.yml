@@ -10,7 +10,6 @@ argument_specs:
           agy: true
           claude_code: true
           aider: false
-          codex: false
           cursor: false
       ai_agents_claude_bin:
         type: str

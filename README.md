@@ -5,7 +5,7 @@
 
 Ansible role to install and configure AI coding agents across Linux and macOS environments.
 
-Installs agents (AGY/Antigravity, Claude Code, Aider, Codex CLI) and wires up a pluggable
+Installs agents (AGY/Antigravity, Claude Code, Aider) and wires up a pluggable
 **agent-config repo** — a separate repository of `AGENTS.md` rules, skills, and
 subagents that all agents read. It clones the config to `~/.config/agents/` and
 symlinks it into each tool:
@@ -42,7 +42,6 @@ engine), and **`dispatcher`** (async agent-to-agent task delegation). See [MCP S
 | `ai_agents_install.agy`                     | `true`                                              | Install AGY (Antigravity CLI)                                                            |
 | `ai_agents_install.claude_code`             | `true`                                              | Install Claude Code CLI                                                                  |
 | `ai_agents_install.aider`                   | `false`                                             | Install Aider CLI                                                                        |
-| `ai_agents_install.codex`                   | `false`                                             | Install Codex CLI                                                                        |
 | `ai_agents_install.cursor`                  | `false`                                             | Install Cursor — _planned, not yet implemented_                                          |
 | `ai_agents_mcp_servers`                     | list (`github`/`ws`/`data`/`dispatcher` by default) | MCP servers to wire into Claude Code + AGY                                               |
 | `ai_agents_mcp_servers_install`             | `true`                                              | Install the `mcp-servers` package (`uv tool`)                                            |
@@ -176,7 +175,6 @@ agent-config/
           agy: true
           claude_code: true
           aider: false
-          codex: false
           cursor: false
 ```
 
