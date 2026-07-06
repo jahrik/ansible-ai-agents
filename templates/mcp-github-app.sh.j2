@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
-# Managed by the ansible-ai-agents role. Loads the GitHub App identity and
-# hands the private key to mcp-github via the environment, so no agent config
-# file ever contains the key itself.
+# Managed by the ansible-ai-agents role. Loads the GitHub App identity when it
+# is configured and hands the private key to mcp-github via the environment, so
+# no agent config file ever contains the key itself. When the identity is not
+# configured (no env file), exec the bare server unauthenticated instead of
+# failing — this wrapper is always the registered command.
 set -euo pipefail
 
-source "{{ ai_agents_mcp_github_env_file }}"
-GITHUB_APP_PRIVATE_KEY="$(< "$GITHUB_APP_PRIVATE_KEY_FILE")"
-export GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY
+env_file="{{ ai_agents_mcp_github_env_file }}"
+if [[ -f "$env_file" ]]; then
+  source "$env_file"
+  GITHUB_APP_PRIVATE_KEY="$(< "$GITHUB_APP_PRIVATE_KEY_FILE")"
+  export GITHUB_APP_ID GITHUB_APP_INSTALLATION_ID GITHUB_APP_PRIVATE_KEY
+fi
 
 exec "{{ ai_agents_mcp_github_bin }}" "$@"

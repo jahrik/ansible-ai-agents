@@ -186,6 +186,22 @@
           - github_app_wrapper.stat.executable
         fail_msg: "mcp-github-app wrapper was not installed to ~/.local/bin"
 
+    - name: Read the Claude Code MCP registration
+      ansible.builtin.slurp:
+        src: "{{ ansible_facts['env']['HOME'] }}/.claude.json"
+      register: github_claude_config
+
+    - name: Assert the github server is registered with the wrapper, not the bare bin
+      vars:
+        github_command: >-
+          {{ (github_claude_config.content | b64decode | from_json).mcpServers.github.command }}
+      ansible.builtin.assert:
+        that:
+          - github_command == ansible_facts['env']['HOME'] ~ '/.local/bin/mcp-github-app'
+        fail_msg: >-
+          github MCP server is registered with '{{ github_command }}', expected the
+          mcp-github-app wrapper — the bare binary never receives the App identity.
+
     - name: Read the global git identity
       ansible.builtin.command: git config --global --get {{ item }}
       loop:
