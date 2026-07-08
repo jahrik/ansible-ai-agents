@@ -20,7 +20,7 @@ support them — Claude Code (user scope, via `claude mcp add-json`) and AGY/Ant
 as a **GitHub App** — writes land as `your-app[bot]`, and **no secret is written to any
 config file**; the role records only the path to your PEM), **`ws`** (read-only local git
 workspace surveys), **`data`** (SQL over large local files + scratch tables, DuckDB
-engine), **`dispatcher`** (async agent-to-agent task delegation), and **`lsp`** (language server proxy). See [MCP Servers](#mcp-servers).
+engine), **`dispatcher`** (async agent-to-agent task delegation), **`lsp`** (language server proxy), and **`memory`** (persistent cross-session long-term memory using DuckDB). See [MCP Servers](#mcp-servers).
 
 ## Requirements
 
@@ -33,25 +33,25 @@ engine), **`dispatcher`** (async agent-to-agent task delegation), and **`lsp`** 
 
 ## Role Variables
 
-| Variable                                    | Default                                                   | Description                                                                                                                        |
-| ------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `ai_agents_config_repo`                     | `https://github.com/jahrik/agent-config`                  | Git URL of your agent config repo                                                                                                  |
-| `ai_agents_config_ref`                      | `main`                                                    | Branch or tag to check out                                                                                                         |
-| `ai_agents_config_dest`                     | `~/.config/agents`                                        | Where the config repo is cloned                                                                                                    |
-| `ai_agents_install.agy`                     | `true`                                                    | Install AGY (Antigravity CLI)                                                                                                      |
-| `ai_agents_install.claude_code`             | `true`                                                    | Install Claude Code CLI                                                                                                            |
-| `ai_agents_mcp_servers`                     | list (`github`/`ws`/`data`/`dispatcher`/`lsp` by default) | MCP servers to wire into Claude Code + AGY                                                                                         |
-| `ai_agents_mcp_servers_install`             | `true`                                                    | Install the `mcp-servers` package (`uv tool`)                                                                                      |
-| `ai_agents_mcp_servers_source`              | `git+https://github.com/jahrik/mcp-servers`               | Source `uv tool install` pulls the package from                                                                                    |
-| `ai_agents_mcp_servers_upgrade`             | `true`                                                    | Upgrade `mcp-servers` to the latest source ref on every run (`uv tool upgrade`, idempotent); set false to pin the installed commit |
-| `ai_agents_mcp_github_app_id`               | `""`                                                      | GitHub App ID for mcp-github (set all three `_app_*` vars to enable App auth)                                                      |
-| `ai_agents_mcp_github_app_installation_id`  | `""`                                                      | GitHub App installation ID                                                                                                         |
-| `ai_agents_mcp_github_app_private_key_file` | `""`                                                      | Path to the App's private-key PEM (path only — the key is never copied anywhere)                                                   |
-| `ai_agents_git_user_name` / `_email`        | `""`                                                      | Optional global git identity matching the App's `[bot]` account                                                                    |
-| `ai_agents_mcp_workspace_root`              | `~/github`                                                | Root the `workspace` MCP server surveys for git repos                                                                              |
-| `ai_agents_claude_permission_deny`          | `["Bash(gh)", "Bash(gh:*)"]`                              | Deny rules merged into `~/.claude/settings.json` — keeps the `gh` CLI human-only                                                   |
-| `ai_agents_claude_hooks`                    | guard-bash on `Bash`                                      | Hooks merged into `~/.claude/settings.json` (pre-existing hook entries preserved)                                                  |
-| `ai_agents_agy_hooks`                       | guard-bash on `run_command`                               | Named hook groups merged into `~/.gemini/config/hooks.json`                                                                        |
+| Variable                                    | Default                                                            | Description                                                                                                                        |
+| ------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `ai_agents_config_repo`                     | `https://github.com/jahrik/agent-config`                           | Git URL of your agent config repo                                                                                                  |
+| `ai_agents_config_ref`                      | `main`                                                             | Branch or tag to check out                                                                                                         |
+| `ai_agents_config_dest`                     | `~/.config/agents`                                                 | Where the config repo is cloned                                                                                                    |
+| `ai_agents_install.agy`                     | `true`                                                             | Install AGY (Antigravity CLI)                                                                                                      |
+| `ai_agents_install.claude_code`             | `true`                                                             | Install Claude Code CLI                                                                                                            |
+| `ai_agents_mcp_servers`                     | list (`github`/`ws`/`data`/`dispatcher`/`lsp`/`memory` by default) | MCP servers to wire into Claude Code + AGY                                                                                         |
+| `ai_agents_mcp_servers_install`             | `true`                                                             | Install the `mcp-servers` package (`uv tool`)                                                                                      |
+| `ai_agents_mcp_servers_source`              | `git+https://github.com/jahrik/mcp-servers`                        | Source `uv tool install` pulls the package from                                                                                    |
+| `ai_agents_mcp_servers_upgrade`             | `true`                                                             | Upgrade `mcp-servers` to the latest source ref on every run (`uv tool upgrade`, idempotent); set false to pin the installed commit |
+| `ai_agents_mcp_github_app_id`               | `""`                                                               | GitHub App ID for mcp-github (set all three `_app_*` vars to enable App auth)                                                      |
+| `ai_agents_mcp_github_app_installation_id`  | `""`                                                               | GitHub App installation ID                                                                                                         |
+| `ai_agents_mcp_github_app_private_key_file` | `""`                                                               | Path to the App's private-key PEM (path only — the key is never copied anywhere)                                                   |
+| `ai_agents_git_user_name` / `_email`        | `""`                                                               | Optional global git identity matching the App's `[bot]` account                                                                    |
+| `ai_agents_mcp_workspace_root`              | `~/github`                                                         | Root the `workspace` MCP server surveys for git repos                                                                              |
+| `ai_agents_claude_permission_deny`          | `["Bash(gh)", "Bash(gh:*)"]`                                       | Deny rules merged into `~/.claude/settings.json` — keeps the `gh` CLI human-only                                                   |
+| `ai_agents_claude_hooks`                    | guard-bash on `Bash`                                               | Hooks merged into `~/.claude/settings.json` (pre-existing hook entries preserved)                                                  |
+| `ai_agents_agy_hooks`                       | guard-bash on `run_command`                                        | Named hook groups merged into `~/.gemini/config/hooks.json`                                                                        |
 
 ## CLI Toolchain
 
@@ -97,6 +97,8 @@ The same package provides the read-only **`ws`** server (`mcp-workspace`), regis
 default: local git surveys (dirty trees, unpushed work, stale branches) across
 `ai_agents_mcp_workspace_root` (default `~/github`). No credentials needed. It registers as
 `ws` because Claude Code reserves the name `workspace`.
+
+The package also includes **`memory`** (`mcp-memory`), which provides a persistent, cross-session long-term memory store using DuckDB.
 
 ### Adding other servers
 
