@@ -79,19 +79,20 @@
   ansible.builtin.slurp:
     src: "{{ ansible_facts['env']['HOME'] }}/.claude.json"
   register: claude_config
-- name: Assert github, ws, and data MCP servers registered with Claude Code
+- name: Assert github, ws, data, and memory MCP servers registered with Claude Code
   ansible.builtin.assert:
     that:
       - "'github' in (claude_config.content | b64decode | from_json).mcpServers"
       - "'ws' in (claude_config.content | b64decode | from_json).mcpServers"
       - "'data' in (claude_config.content | b64decode | from_json).mcpServers"
-    fail_msg: "github/ws/data MCP servers were not registered with Claude Code"
+      - "'memory' in (claude_config.content | b64decode | from_json).mcpServers"
+    fail_msg: "github/ws/data/memory MCP servers were not registered with Claude Code"
 
 - name: Read AGY MCP config
   ansible.builtin.slurp:
     src: "{{ ansible_facts['env']['HOME'] }}/.gemini/config/mcp_config.json"
   register: agy_mcp_config
-- name: Assert github, ws, and data MCP servers configured for AGY with commands
+- name: Assert github, ws, data, and memory MCP servers configured for AGY with commands
   ansible.builtin.assert:
     that:
       - "'github' in (agy_mcp_config.content | b64decode | from_json).mcpServers"
@@ -100,7 +101,9 @@
       - "(agy_mcp_config.content | b64decode | from_json).mcpServers.ws.command is defined"
       - "'data' in (agy_mcp_config.content | b64decode | from_json).mcpServers"
       - "(agy_mcp_config.content | b64decode | from_json).mcpServers.data.command is defined"
-    fail_msg: "github/ws/data MCP servers were not configured for AGY"
+      - "'memory' in (agy_mcp_config.content | b64decode | from_json).mcpServers"
+      - "(agy_mcp_config.content | b64decode | from_json).mcpServers.memory.command is defined"
+    fail_msg: "github/ws/data/memory MCP servers were not configured for AGY"
 
 - name: Stat the mcp-servers binaries
   ansible.builtin.stat:
@@ -109,6 +112,7 @@
     - mcp-github
     - mcp-workspace
     - mcp-data
+    - mcp-memory
   register: mcp_server_bins
 - name: Assert the mcp-servers binaries are installed
   ansible.builtin.assert:

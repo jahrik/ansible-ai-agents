@@ -99,6 +99,7 @@ ai_agents_mcp_data_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-data"
 ai_agents_mcp_dispatcher_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-dispatcher"
 ai_agents_mcp_lsp_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-lsp"
 ai_agents_mcp_lsp_command: "pyright-langserver --stdio"
+ai_agents_mcp_memory_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-memory"
 # Keep the runtime DB out of the agent-config git clone (~/.config/agents),
 # where an untracked dispatcher.db risks being committed or wiped on re-clone.
 # ~/.mcp is the server's own safe default and sits alongside the github audit.db.
@@ -167,6 +168,11 @@ ai_agents_mcp_servers:
     env:
       MCP_LSP_COMMAND: "{{ ai_agents_mcp_lsp_command }}"
       MCP_LSP_ROOT: "{{ ai_agents_mcp_workspace_root }}"
+  - name: memory
+    type: stdio
+    command: "{{ ai_agents_mcp_memory_bin }}"
+    args: []
+    env: {}
 
 # Root directory the workspace server surveys for git repos.
 ai_agents_mcp_workspace_root: "{{ ansible_facts['env']['HOME'] }}/github"
