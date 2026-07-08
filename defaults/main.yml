@@ -41,31 +41,11 @@ ai_agents_cli_tools:
     archive: tar
     url: "https://github.com/dandavison/delta/releases/download/0.19.2/delta-0.19.2-x86_64-unknown-linux-musl.tar.gz"
     src: "delta-0.19.2-x86_64-unknown-linux-musl/delta"
-  - name: ast-grep
-    version: "0.44.0"
-    archive: zip
-    url: "https://github.com/ast-grep/ast-grep/releases/download/0.44.0/app-x86_64-unknown-linux-gnu.zip"
-    src: "ast-grep"
-  - name: xsv
-    version: "0.13.0"
-    archive: tar
-    url: "https://github.com/BurntSushi/xsv/releases/download/0.13.0/xsv-0.13.0-x86_64-unknown-linux-musl.tar.gz"
-    src: "xsv"
-  - name: htmlq
-    version: "0.4.0"
-    archive: tar
-    url: "https://github.com/mgdm/htmlq/releases/download/v0.4.0/htmlq-x86_64-linux.tar.gz"
-    src: "htmlq"
   - name: gron
     version: "0.7.1"
     archive: tar
     url: "https://github.com/tomnomnom/gron/releases/download/v0.7.1/gron-linux-amd64-0.7.1.tgz"
     src: "gron"
-  - name: jc
-    version: "1.25.7"
-    archive: tar
-    url: "https://github.com/kellyjonbrazil/jc/releases/download/v1.25.7/jc-1.25.7-linux-x86_64.tar.gz"
-    src: "jc"
   - name: sd
     version: "1.1.0"
     archive: tar
@@ -76,11 +56,6 @@ ai_agents_cli_tools:
     archive: tar
     url: "https://github.com/XAMPPRocky/tokei/releases/download/v12.1.2/tokei-x86_64-unknown-linux-musl.tar.gz"
     src: "tokei"
-  - name: duckdb
-    version: "1.5.4"
-    archive: zip
-    url: "https://github.com/duckdb/duckdb/releases/download/v1.5.4/duckdb_cli-linux-amd64.zip"
-    src: "duckdb"
   - name: shellcheck
     version: "0.11.0"
     archive: tar
