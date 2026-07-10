@@ -10,4 +10,4 @@ This is controlled by `ai_agents_install.cli_tools` (and `ai_agents_install.repo
 
 ## Upgrading Tools
 
-The role is idempotent — it skips downloads if the binary already exists. To upgrade a tool, bump its pinned version in `defaults/main.yml` and delete the old binary from `~/.local/bin` before running the playbook.
+The role is idempotent - it skips downloads if the binary already exists. To upgrade a tool, bump its pinned version in `defaults/main.yml` and delete the old binary from `~/.local/bin` before running the playbook.
