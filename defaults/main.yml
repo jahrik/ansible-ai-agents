@@ -186,10 +186,16 @@ ai_agents_claude_permission_deny:
   - "Bash(gh)"
   - "Bash(gh:*)"
 
-# Lifecycle hooks. guard-bash ships with the agent config repo and speaks both
-# hook contracts: it blocks gh anywhere in a shell command (compound commands
-# included) and pushes to main/master.
+# Lifecycle hooks; all ship with the agent config repo and carry a --test
+# self-test. guard-bash and guard-write speak both hook contracts:
+#   guard-bash   blocks gh anywhere in a shell command (compound commands
+#                included) and pushes to main/master (Hard Rules 5, 7)
+#   guard-write  blocks credential patterns in newly written file content
+#                (Hard Rule 1); edits that remove a secret pass
+#   format-on-edit  runs shfmt/ruff/gofmt on the just-edited file
 ai_agents_hook_guard_bash: "{{ ai_agents_config_dest }}/hooks/guard-bash.sh"
+ai_agents_hook_guard_write: "{{ ai_agents_config_dest }}/hooks/guard-write.sh"
+ai_agents_hook_format_on_edit: "{{ ai_agents_config_dest }}/hooks/format-on-edit.sh"
 
 # Merged into ~/.claude/settings.json alongside the deny rules; pre-existing
 # hook entries are preserved.
@@ -199,9 +205,21 @@ ai_agents_claude_hooks:
       hooks:
         - type: "command"
           command: "{{ ai_agents_hook_guard_bash }}"
+    - matcher: "Write|Edit|NotebookEdit"
+      hooks:
+        - type: "command"
+          command: "{{ ai_agents_hook_guard_write }}"
+  PostToolUse:
+    - matcher: "Write|Edit"
+      hooks:
+        - type: "command"
+          command: "{{ ai_agents_hook_format_on_edit }}"
 
 # Written to AGY's Global Customizations Root as named hook groups
 # (~/.gemini/config/hooks.json); groups with other names are preserved.
+# The guard-write matchers name AGY's file-write tools best-effort (to be
+# confirmed by the AGY parity audit); an unmatched matcher is inert.
+# format-on-edit is Claude-only until AGY's write-tool args are verified.
 ai_agents_agy_hooks:
   guard-bash:
     PreToolUse:
@@ -209,6 +227,16 @@ ai_agents_agy_hooks:
         hooks:
           - type: "command"
             command: "{{ ai_agents_hook_guard_bash }}"
+  guard-write:
+    PreToolUse:
+      - matcher: "write_to_file"
+        hooks:
+          - type: "command"
+            command: "{{ ai_agents_hook_guard_write }}"
+      - matcher: "replace_file_content"
+        hooks:
+          - type: "command"
+            command: "{{ ai_agents_hook_guard_write }}"
 
 # Enable write operations for the mcp-github server (merging PRs, creating issues, etc.)
 ai_agents_mcp_github_allow_write: true
