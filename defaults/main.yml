@@ -75,9 +75,9 @@ ai_agents_cli_tools:
     url: "https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz"
     src: "actionlint"
 
-# repo-sync (Go CLI: sync/clean/report across GitHub repos) — release binary
-ai_agents_repo_sync_version: "0.2.2"
-ai_agents_repo_sync_url: "https://github.com/jahrik/repo-sync/releases/download/v0.2.2/repo-sync_0.2.2_linux_amd64.tar.gz"
+# rs (Go CLI: sync/clean/report across GitHub repos) — release binary
+ai_agents_repo_sync_version: "0.4.0"
+ai_agents_repo_sync_url: "https://github.com/jahrik/repo-sync/releases/download/v0.4.0/rs_0.4.0_linux_amd64.tar.gz"
 
 # Claude Code CLI path (installed by tasks/install/claude_code.yml) — used to
 # register MCP servers via `claude mcp add-json`.

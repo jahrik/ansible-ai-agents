@@ -59,7 +59,7 @@ The role optionally installs a standardized agent CLI toolchain into `~/.local/b
 
 - **Tools:** `rg`, `fd`, `jq`, `yq`, `bat`, `delta`, `gron`, `sd`, `tokei`
 - **Linters:** `shellcheck`, `shfmt`, `hadolint`, `actionlint`
-- **Utilities:** `repo-sync`
+- **Utilities:** `rs`
 
 This is controlled by `ai_agents_install.cli_tools` (and `ai_agents_install.repo_sync`) in your variables.
 
