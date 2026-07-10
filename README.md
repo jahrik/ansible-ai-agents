@@ -93,12 +93,18 @@ The role installs the package with `uv tool install` (bootstrapping `uv` if need
 vars unset and the bare server is registered anyway — it just can't authenticate until the
 `GITHUB_APP_*` env vars reach it some other way.
 
-The same package provides the read-only **`ws`** server (`mcp-workspace`), registered by
-default: local git surveys (dirty trees, unpushed work, stale branches) across
-`ai_agents_mcp_workspace_root` (default `~/github`). No credentials needed. It registers as
-`ws` because Claude Code reserves the name `workspace`.
+The same package provides the other five default servers, none of which need credentials:
 
-The package also includes **`memory`** (`mcp-memory`), which provides a persistent, cross-session long-term memory store using DuckDB.
+- **`ws`** (`mcp-workspace`) — read-only local git surveys (dirty trees, unpushed work, stale
+  branches) across `ai_agents_mcp_workspace_root` (default `~/github`). It registers as `ws`
+  because Claude Code reserves the name `workspace`.
+- **`data`** (`mcp-data`) — SQL over local files (CSV/JSON/JSONL/Parquet) via DuckDB.
+- **`dispatcher`** (`mcp-dispatcher`) — async agent-to-agent job queue (SQLite-backed).
+- **`lsp`** (`mcp-lsp`) — language-server and tree-sitter code navigation.
+- **`memory`** (`mcp-memory`) — persistent, cross-session long-term memory store using DuckDB.
+
+Each server has a page in the package's
+[`docs/`](https://github.com/jahrik/mcp-servers/tree/main/docs).
 
 ### Adding other servers
 
@@ -131,15 +137,18 @@ ansible-playbook playbook.yml --tags ai_agents:install
 ansible-playbook playbook.yml --skip-tags ai_agents:mcp_servers
 ```
 
-| Tag                     | Scope                             |
-| ----------------------- | --------------------------------- |
-| `ai_agents`             | All role tasks                    |
-| `ai_agents:vars`        | OS-specific variable loading      |
-| `ai_agents:install`     | Agent CLI installs                |
-| `ai_agents:clone`       | Clone the agent config repo       |
-| `ai_agents:symlinks`    | Wire config repo into tool paths  |
-| `ai_agents:mcp_servers` | Install the `mcp-servers` package |
-| `ai_agents:mcp`         | Register MCP servers              |
+| Tag                      | Scope                                             |
+| ------------------------ | ------------------------------------------------- |
+| `ai_agents`              | All role tasks                                    |
+| `ai_agents:vars`         | OS-specific variable loading                      |
+| `ai_agents:install`      | Agent CLI installs                                |
+| `ai_agents:clone`        | Clone the agent config repo                       |
+| `ai_agents:symlinks`     | Wire config repo into tool paths                  |
+| `ai_agents:mcp_servers`  | Install the `mcp-servers` package                 |
+| `ai_agents:mcp`          | Register MCP servers                              |
+| `ai_agents:settings`     | Merge deny rules + hooks into Claude/AGY settings |
+| `ai_agents:github_app`   | GitHub App env file + wrapper                     |
+| `ai_agents:git_identity` | Global git identity for the App's `[bot]` account |
 
 ## Bring Your Own Config Repo
 
@@ -157,6 +166,7 @@ agent-config/
 ├── AGENTS.md          # global rules — all agents read this
 ├── agents/            # subagent personas → ~/.claude/agents/ + ~/.gemini/config/agents/
 │   └── <agent>.md
+├── hooks/             # lifecycle guard scripts the role registers in each agent's settings
 └── skills/            # modular skill packs (both tools discover these)
     └── <skill>/
         └── SKILL.md
