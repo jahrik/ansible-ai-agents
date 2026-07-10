@@ -13,7 +13,7 @@ The config repo should follow this structure:
 
 ```
 agent-config/
-├── AGENTS.md          # global rules — all agents read this
+├── AGENTS.md          # global rules - all agents read this
 ├── agents/            # subagent personas → ~/.claude/agents/ + ~/.gemini/config/agents/
 │   └── <agent>.md
 ├── hooks/             # lifecycle guard scripts the role registers in each agent's settings
