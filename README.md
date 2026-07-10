@@ -57,120 +57,22 @@ engine), **`dispatcher`** (async agent-to-agent task delegation), **`lsp`** (lan
 
 The role optionally installs a standardized agent CLI toolchain into `~/.local/bin` (bypassing root/system packages). These are pinned static release binaries to ensure the agent has the tools it needs across all distributions (and works on immutable rootfs).
 
-- **Tools:** `rg`, `fd`, `jq`, `yq`, `bat`, `delta`, `gron`, `sd`, `tokei`
-- **Linters:** `shellcheck`, `shfmt`, `hadolint`, `actionlint`
-- **Utilities:** `rs`
-
-This is controlled by `ai_agents_install.cli_tools` (and `ai_agents_install.repo_sync`) in your variables.
-
-### Upgrading Tools
-
-The role is idempotent — it skips downloads if the binary already exists. To upgrade a tool, bump its pinned version in `defaults/main.yml` and delete the old binary from `~/.local/bin` before running the playbook.
+See [docs/cli-toolchain.md](docs/cli-toolchain.md) for full details on included tools and upgrade instructions.
 
 ## MCP Servers
 
-`ai_agents_mcp_servers` defines MCP servers to register with every enabled agent that
-supports them. Each entry is either a local (`type: stdio`) or remote (`type: http`)
-server. The default is **`github`**, from the
-[`mcp-servers`](https://github.com/jahrik/mcp-servers) package — a local stdio server that
-authenticates as a **GitHub App**. Point the role at your App's identity:
+`ai_agents_mcp_servers` defines MCP servers to register with every enabled agent that supports them. Each entry is either a local (`type: stdio`) or remote (`type: http`) server.
 
-```yaml
-ai_agents_mcp_github_app_id: "123456"
-ai_agents_mcp_github_app_installation_id: "654321"
-ai_agents_mcp_github_app_private_key_file: "{{ ansible_env.HOME }}/.ssh/my-app.private-key.pem"
-```
+By default, it installs the `mcp-servers` package (`github`, `ws`, `data`, `dispatcher`, `lsp`, `memory`).
 
-The App ID and installation ID are not secrets, and the private key **stays in the PEM
-where it already lives** — the role writes only its _path_ into
-`~/.config/ai-agents/github-app.env` (mode `0600`) and registers the server through a
-`~/.local/bin/mcp-github-app` wrapper that exports the key at launch. No agent config
-file ever holds the key. Optionally set `ai_agents_git_user_name` /
-`ai_agents_git_user_email` so local commits match the App's `[bot]` identity.
+See [docs/mcp-servers.md](docs/mcp-servers.md) for full documentation on configuration, adding new servers, and GitHub App authentication.
 
-The role installs the package with `uv tool install` (bootstrapping `uv` if needed); set
-`ai_agents_mcp_servers_install: false` to skip that. Leave the `ai_agents_mcp_github_app_*`
-vars unset and the bare server is registered anyway — it just can't authenticate until the
-`GITHUB_APP_*` env vars reach it some other way.
+## Configuration
 
-The same package provides the other five default servers, none of which need credentials:
+See [docs/configuration.md](docs/configuration.md) for details on:
 
-- **`ws`** (`mcp-workspace`) — read-only local git surveys (dirty trees, unpushed work, stale
-  branches) across `ai_agents_mcp_workspace_root` (default `~/github`). It registers as `ws`
-  because Claude Code reserves the name `workspace`.
-- **`data`** (`mcp-data`) — SQL over local files (CSV/JSON/JSONL/Parquet) via DuckDB.
-- **`dispatcher`** (`mcp-dispatcher`) — async agent-to-agent job queue (SQLite-backed).
-- **`lsp`** (`mcp-lsp`) — language-server and tree-sitter code navigation.
-- **`memory`** (`mcp-memory`) — persistent, cross-session long-term memory store using DuckDB.
-
-Each server has a page in the package's
-[`docs/`](https://github.com/jahrik/mcp-servers/tree/main/docs).
-
-### Adding other servers
-
-Add remote (`type: http`) or local (`type: stdio`) entries to the list:
-
-```yaml
-ai_agents_mcp_servers:
-  - name: context7 # keyless docs server
-    type: http
-    url: "https://mcp.context7.com/mcp"
-  - name: my-local-server
-    type: stdio
-    command: npx
-    args: ["-y", "@scope/some-mcp"]
-```
-
-**Never put a secret in this variable.** For servers that need a credential, reference an
-environment variable — Claude Code expands `${VAR}` in urls, headers, and env values at
-runtime, so only the placeholder (never the secret) is written to `~/.claude.json`.
-
-> **AGY/Antigravity does not expand `${VAR}`.** A secret-bearing server won't authenticate
-> there — configure those by hand in AGY if you need them (never commit a token).
-
-## Tags
-
-Run or skip parts of the role with tags:
-
-```bash
-ansible-playbook playbook.yml --tags ai_agents:install
-ansible-playbook playbook.yml --skip-tags ai_agents:mcp_servers
-```
-
-| Tag                      | Scope                                             |
-| ------------------------ | ------------------------------------------------- |
-| `ai_agents`              | All role tasks                                    |
-| `ai_agents:vars`         | OS-specific variable loading                      |
-| `ai_agents:install`      | Agent CLI installs                                |
-| `ai_agents:clone`        | Clone the agent config repo                       |
-| `ai_agents:symlinks`     | Wire config repo into tool paths                  |
-| `ai_agents:mcp_servers`  | Install the `mcp-servers` package                 |
-| `ai_agents:mcp`          | Register MCP servers                              |
-| `ai_agents:settings`     | Merge deny rules + hooks into Claude/AGY settings |
-| `ai_agents:github_app`   | GitHub App env file + wrapper                     |
-| `ai_agents:git_identity` | Global git identity for the App's `[bot]` account |
-
-## Bring Your Own Config Repo
-
-Point the role at your own fork of `agent-config`:
-
-```yaml
-# group_vars/all.yml or playbook vars
-ai_agents_config_repo: "https://github.com/YOUR_USERNAME/agent-config"
-```
-
-The config repo should follow this structure:
-
-```
-agent-config/
-├── AGENTS.md          # global rules — all agents read this
-├── agents/            # subagent personas → ~/.claude/agents/ + ~/.gemini/config/agents/
-│   └── <agent>.md
-├── hooks/             # lifecycle guard scripts the role registers in each agent's settings
-└── skills/            # modular skill packs (both tools discover these)
-    └── <skill>/
-        └── SKILL.md
-```
+- Using tags to run specific parts of the role
+- Pointing the role to your own agent config repository
 
 ## Example Playbook
 
