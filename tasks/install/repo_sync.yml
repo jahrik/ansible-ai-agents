@@ -1,9 +1,18 @@
 ---
 # Install rs (Go CLI) from its GitHub release into ai_agents_bin_dir.
+- name: Warn and skip rs on non-x86_64 hosts
+  ansible.builtin.debug:
+    msg: >-
+      Skipping rs installation: pinned release assets are x86_64 Linux and this
+      host is {{ ansible_facts['architecture'] }}.
+  when: ansible_facts['architecture'] != 'x86_64'
+
 - name: Remove stale repo-sync binary
   ansible.builtin.file:
     path: "{{ ai_agents_bin_dir }}/repo-sync"
     state: absent
+  when: ansible_facts['architecture'] == 'x86_64'
+
 
 - name: Check whether rs is installed
   ansible.builtin.stat:
