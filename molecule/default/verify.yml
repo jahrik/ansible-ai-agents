@@ -121,7 +121,7 @@
         - shfmt
         - hadolint
         - actionlint
-        - repo-sync
+        - rs
       register: cli_tool_stats
 
     - name: Assert every CLI tool binary is installed and executable
