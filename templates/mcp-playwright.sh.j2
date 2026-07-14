@@ -1,0 +1,13 @@
+#!/bin/bash
+# Ensure Node.js binaries are in PATH
+export PATH="{{ ansible_facts['env']['HOME'] }}/.local/bin:$PATH"
+
+# Find the downloaded Chromium binary from Playwright
+CHROME_EXE=$(find "{{ ansible_facts['env']['HOME'] }}/.cache/ms-playwright" -path "*/chrome-linux64/chrome" -type f | head -n 1)
+
+if [ -z "$CHROME_EXE" ]; then
+  echo "Error: Playwright Chromium executable not found." >&2
+  exit 1
+fi
+
+exec npx @playwright/mcp@latest --headless --executable-path "$CHROME_EXE" "$@"

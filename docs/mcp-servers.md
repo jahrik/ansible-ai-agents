@@ -33,6 +33,7 @@ The same package provides the other five default servers, none of which need cre
 - **`dispatcher`** (`mcp-dispatcher`) - async agent-to-agent job queue (SQLite-backed).
 - **`lsp`** (`mcp-lsp`) - language-server and tree-sitter code navigation.
 - **`memory`** (`mcp-memory`) - persistent, cross-session long-term memory store using DuckDB.
+- **`playwright`** (`playwright-mcp`) - local dev server browser rendering via Chromium. Note: Playwright doesn't officially support Arch/SteamOS; it falls back to an Ubuntu build. The server works on Arch, but Playwright's library dependency installer only supports apt/dnf, so if shared library errors occur, you must install missing `pacman` packages manually. The server also requires a session restart to become available in Claude Code if newly added.
 
 Each server has a page in the package's
 [`docs/`](https://github.com/jahrik/mcp-servers/tree/main/docs).
