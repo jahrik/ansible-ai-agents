@@ -4,6 +4,7 @@ ai_agents_install:
   agy: true
   claude_code: true
   cli_tools: true
+  playwright: true
   repo_sync: true
 
 # Where standalone binaries land (no root needed; works on immutable rootfs)
@@ -100,6 +101,13 @@ ai_agents_mcp_dispatcher_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp
 ai_agents_mcp_lsp_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-lsp"
 ai_agents_mcp_lsp_command: "pyright-langserver --stdio"
 ai_agents_mcp_memory_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-memory"
+ai_agents_mcp_playwright_wrapper: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-playwright"
+
+# Node.js installer vars for Playwright
+ai_agents_node_version: "22.14.0"
+ai_agents_node_url: "https://nodejs.org/dist/v{{ ai_agents_node_version }}/node-v{{ ai_agents_node_version }}-linux-x64.tar.xz"
+ai_agents_node_dir: "{{ ansible_facts['env']['HOME'] }}/.local/opt/node"
+
 # Keep the runtime DB out of the agent-config git clone (~/.config/agents),
 # where an untracked dispatcher.db risks being committed or wiped on re-clone.
 # ~/.mcp is the server's own safe default and sits alongside the github audit.db.
@@ -171,6 +179,11 @@ ai_agents_mcp_servers:
   - name: memory
     type: stdio
     command: "{{ ai_agents_mcp_memory_bin }}"
+    args: []
+    env: {}
+  - name: playwright
+    type: stdio
+    command: "{{ ai_agents_mcp_playwright_wrapper }}"
     args: []
     env: {}
 

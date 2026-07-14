@@ -8,14 +8,14 @@ Installs and configures AI coding agents across OS environments. See `README.md`
 
 ## Key Variables
 
-| Variable                | Default                                                               | Description                                  |
-| ----------------------- | --------------------------------------------------------------------- | -------------------------------------------- |
-| `ai_agents_config_repo` | `https://github.com/jahrik/agent-config`                              | Git URL of the agent config repo to clone    |
-| `ai_agents_config_ref`  | `main`                                                                | Branch or tag to check out                   |
-| `ai_agents_config_dest` | `~/.config/agents`                                                    | Clone destination for the config repo        |
-| `ai_agents_install`     | dict (`agy`/`claude_code` on by default)                              | Per-agent install toggles                    |
-| `ai_agents_symlinks`    | list                                                                  | `src`→`dest` links from config repo to tools |
-| `ai_agents_mcp_servers` | list (6 by default: `github`/`ws`/`data`/`dispatcher`/`lsp`/`memory`) | MCP servers wired into Claude Code + AGY     |
+| Variable                | Default                                                                            | Description                                  |
+| ----------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------- |
+| `ai_agents_config_repo` | `https://github.com/jahrik/agent-config`                                           | Git URL of the agent config repo to clone    |
+| `ai_agents_config_ref`  | `main`                                                                             | Branch or tag to check out                   |
+| `ai_agents_config_dest` | `~/.config/agents`                                                                 | Clone destination for the config repo        |
+| `ai_agents_install`     | dict (`agy`/`claude_code` on by default)                                           | Per-agent install toggles                    |
+| `ai_agents_symlinks`    | list                                                                               | `src`→`dest` links from config repo to tools |
+| `ai_agents_mcp_servers` | list (7 by default: `github`/`ws`/`data`/`dispatcher`/`lsp`/`memory`/`playwright`) | MCP servers wired into Claude Code + AGY     |
 
 ## Key Files
 

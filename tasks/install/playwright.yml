@@ -1,0 +1,47 @@
+---
+# Install Node.js (if not already present in ~/.local/opt/node) and Playwright Chromium binary
+
+- name: Check whether local Node.js is installed
+  ansible.builtin.stat:
+    path: "{{ ai_agents_node_dir }}/bin/node"
+  register: ai_agents_node_binary
+
+- name: Install Node.js
+  when: not ai_agents_node_binary.stat.exists
+  block:
+    - name: Ensure Node.js install directory exists
+      ansible.builtin.file:
+        path: "{{ ai_agents_node_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Download and extract Node.js
+      ansible.builtin.unarchive:
+        src: "{{ ai_agents_node_url }}"
+        dest: "{{ ai_agents_node_dir }}"
+        remote_src: true
+        extra_opts:
+          - --strip-components=1
+        creates: "{{ ai_agents_node_dir }}/bin/node"
+
+    - name: Symlink Node.js binaries
+      ansible.builtin.file:
+        src: "{{ ai_agents_node_dir }}/bin/{{ item }}"
+        dest: "{{ ai_agents_bin_dir }}/{{ item }}"
+        state: link
+      loop:
+        - node
+        - npm
+        - npx
+        - corepack
+
+- name: Check whether Playwright Chromium is installed
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['env']['HOME'] }}/.cache/ms-playwright"
+  register: ai_agents_playwright_cache
+
+- name: Install Playwright Chromium binary
+  ansible.builtin.command:
+    cmd: "{{ ai_agents_bin_dir }}/npx playwright install chromium"
+  when: not ai_agents_playwright_cache.stat.exists
+  changed_when: true
