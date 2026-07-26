@@ -1,5 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Ensure Node.js binaries are in PATH
+set -euo pipefail
 export PATH="{{ ansible_facts['env']['HOME'] }}/.local/bin:$PATH"
 
 # Find the downloaded Chromium binary from Playwright
@@ -10,4 +11,4 @@ if [ -z "$CHROME_EXE" ]; then
   exit 1
 fi
 
-exec npx @playwright/mcp@latest --headless --executable-path "$CHROME_EXE" "$@"
+exec npx --yes @playwright/mcp@latest --headless --executable-path "$CHROME_EXE" "$@"
