@@ -37,6 +37,16 @@ The same package provides the other five default servers, none of which need cre
 Each server has a page in the package's
 [`docs/`](https://github.com/jahrik/mcp-servers/tree/main/docs).
 
+A seventh, **`playwright`**, is unrelated to the `mcp-servers` package: the role installs a
+pinned Node.js + Chromium locally and registers `npx @playwright/mcp` through a local
+`mcp-playwright` wrapper script (`ai_agents_mcp_playwright_wrapper`) that resolves the
+downloaded Chromium executable path at launch - local dev server browser rendering, x86_64
+Linux only. Note: Playwright doesn't officially support Arch/SteamOS; it falls back to an
+Ubuntu build. The server works on Arch, but Playwright's library dependency installer only
+supports apt/dnf, so if shared library errors occur, you must install missing `pacman`
+packages manually. The server also requires a session restart to become available in Claude
+Code if newly added.
+
 ## Adding other servers
 
 Add remote (`type: http`) or local (`type: stdio`) entries to the list:

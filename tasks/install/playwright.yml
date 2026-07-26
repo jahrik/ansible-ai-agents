@@ -1,0 +1,69 @@
+---
+# Install Node.js (if not already present in ~/.local/opt/node) and Playwright Chromium binary.
+# Pinned Node.js/Chromium builds are x86_64 Linux only; other architectures skip
+# with a warning rather than failing the whole role.
+
+- name: Warn and skip Playwright on non-x86_64 hosts
+  ansible.builtin.debug:
+    msg: >-
+      Skipping Playwright installation: pinned Node.js/Chromium builds are
+      x86_64 Linux and this host is {{ ansible_facts['architecture'] }}.
+  when: ansible_facts['architecture'] != 'x86_64'
+
+- name: Install Playwright
+  when: ansible_facts['architecture'] == 'x86_64'
+  block:
+    - name: Check whether local Node.js is installed
+      ansible.builtin.stat:
+        path: "{{ ai_agents_node_dir }}/bin/node"
+      register: ai_agents_node_binary
+
+    - name: Install Node.js
+      when: not ai_agents_node_binary.stat.exists
+      block:
+        - name: Ensure Node.js install directory exists
+          ansible.builtin.file:
+            path: "{{ ai_agents_node_dir }}"
+            state: directory
+            mode: '0755'
+
+        - name: Download and extract Node.js
+          ansible.builtin.unarchive:
+            src: "{{ ai_agents_node_url }}"
+            dest: "{{ ai_agents_node_dir }}"
+            remote_src: true
+            extra_opts:
+              - --strip-components=1
+            creates: "{{ ai_agents_node_dir }}/bin/node"
+
+    - name: Ensure bin directory exists
+      ansible.builtin.file:
+        path: "{{ ai_agents_bin_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Symlink Node.js binaries
+      ansible.builtin.file:
+        src: "{{ ai_agents_node_dir }}/bin/{{ item }}"
+        dest: "{{ ai_agents_bin_dir }}/{{ item }}"
+        state: link
+        force: true
+        follow: false
+      loop:
+        - node
+        - npm
+        - npx
+        - corepack
+
+    - name: Check whether Playwright Chromium is installed
+      ansible.builtin.stat:
+        path: "{{ ansible_facts['env']['HOME'] }}/.cache/ms-playwright"
+      register: ai_agents_playwright_cache
+
+    - name: Install Playwright Chromium binary
+      ansible.builtin.command:
+        cmd: "{{ ai_agents_bin_dir }}/npx --yes playwright install chromium"
+      environment:
+        PATH: "{{ ai_agents_bin_dir }}:{{ ansible_env.PATH }}"
+      when: not ai_agents_playwright_cache.stat.exists
+      changed_when: true

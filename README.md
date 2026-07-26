@@ -22,6 +22,7 @@ It acts as the glue that ties together the three parts of the harness:
   - `dispatcher` - Async task delegation between agents.
   - `lsp` - Language-server code navigation.
   - `memory` - Persistent cross-session memory (DuckDB).
+  - `playwright` - Local browser rendering via Chromium (Arch/SteamOS needs manual shared library deps).
 - **CLI Toolchain:** Deploys pinned, statically-compiled CLI tools (`rg`, `fd`, `jq`, linters, etc.) to guarantee a predictable environment for the agents.
 
 ## Documentation

@@ -77,3 +77,10 @@
     src: mcp-github-app.sh.j2
     dest: "{{ ai_agents_mcp_github_wrapper }}"
     mode: "0755"
+
+- name: Install the mcp-playwright wrapper
+  ansible.builtin.template:
+    src: mcp-playwright.sh.j2
+    dest: "{{ ai_agents_mcp_playwright_wrapper }}"
+    mode: "0755"
+  when: ai_agents_mcp_servers | selectattr('name', 'equalto', 'playwright') | list | length > 0
