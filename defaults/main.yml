@@ -97,21 +97,12 @@ ai_agents_uv_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/uv"
 ai_agents_mcp_github_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-github"
 ai_agents_mcp_workspace_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-workspace"
 ai_agents_mcp_data_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-data"
-ai_agents_mcp_dispatcher_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-dispatcher"
-ai_agents_mcp_lsp_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-lsp"
-ai_agents_mcp_lsp_command: "pyright-langserver --stdio"
-ai_agents_mcp_memory_bin: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-memory"
 ai_agents_mcp_playwright_wrapper: "{{ ansible_facts['env']['HOME'] }}/.local/bin/mcp-playwright"
 
 # Node.js installer vars for Playwright
 ai_agents_node_version: "22.14.0"
 ai_agents_node_url: "https://nodejs.org/dist/v{{ ai_agents_node_version }}/node-v{{ ai_agents_node_version }}-linux-x64.tar.xz"
 ai_agents_node_dir: "{{ ansible_facts['env']['HOME'] }}/.local/opt/node"
-
-# Keep the runtime DB out of the agent-config git clone (~/.config/agents),
-# where an untracked dispatcher.db risks being committed or wiped on re-clone.
-# ~/.mcp is the server's own safe default and sits alongside the github audit.db.
-ai_agents_mcp_dispatcher_db_path: "{{ ansible_facts['env']['HOME'] }}/.mcp/dispatcher.db"
 
 # MCP servers to register with the enabled agents (Claude Code + AGY). Entries
 # are 'stdio' (command/args/env) or 'http' (url/headers). Never put a secret
@@ -136,14 +127,9 @@ ai_agents_mcp_dispatcher_db_path: "{{ ansible_facts['env']['HOME'] }}/.mcp/dispa
 # Local-only, no credentials. Limits are tunable via MCP_DATA_MAX_CHARS /
 # MCP_DATA_QUERY_TIMEOUT / MCP_DUCKDB_MEMORY_LIMIT (defaults are sensible).
 #
-# The `dispatcher` server (mcp-dispatcher, same package) manages job state
-# in an SQLite database and asynchronously spawns subagents to handle them.
-# The server can spawn subprocesses when MCP_DISPATCHER_ALLOW_SPAWN is set to 1.
-#
-# The `lsp` server (mcp-lsp, same package) proxies language intelligence
-# requests to an external LSP server. By default it uses pyright-langserver,
-# which MUST be installed externally by the user (e.g. via npm install -g pyright)
-# or the command overridden via ai_agents_mcp_lsp_command.
+# dispatcher, lsp, and memory are archived: usage telemetry showed zero calls
+# in production, so they were dropped from mcp-servers' [project.scripts] and
+# are no longer registered here. Source remains in the mcp-servers repo.
 ai_agents_mcp_servers:
   - name: github
     type: stdio
@@ -160,25 +146,6 @@ ai_agents_mcp_servers:
   - name: data
     type: stdio
     command: "{{ ai_agents_mcp_data_bin }}"
-    args: []
-    env: {}
-  - name: dispatcher
-    type: stdio
-    command: "{{ ai_agents_mcp_dispatcher_bin }}"
-    args: []
-    env:
-      MCP_DISPATCHER_ALLOW_SPAWN: "1"
-      MCP_DISPATCHER_DB_PATH: "{{ ai_agents_mcp_dispatcher_db_path }}"
-  - name: lsp
-    type: stdio
-    command: "{{ ai_agents_mcp_lsp_bin }}"
-    args: []
-    env:
-      MCP_LSP_COMMAND: "{{ ai_agents_mcp_lsp_command }}"
-      MCP_LSP_ROOT: "{{ ai_agents_mcp_workspace_root }}"
-  - name: memory
-    type: stdio
-    command: "{{ ai_agents_mcp_memory_bin }}"
     args: []
     env: {}
   - name: playwright
