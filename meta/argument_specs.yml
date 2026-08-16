@@ -55,6 +55,11 @@ argument_specs:
             command: "{{ ai_agents_mcp_data_bin }}"
             args: []
             env: {}
+          - name: playwright
+            type: stdio
+            command: "{{ ai_agents_mcp_playwright_wrapper }}"
+            args: []
+            env: {}
       ai_agents_mcp_github_allow_write:
         type: bool
         description: >-

@@ -37,7 +37,7 @@ showed zero calls in production) and are no longer registered here.
 Each server has a page in the package's
 [`docs/`](https://github.com/jahrik/mcp-servers/tree/main/docs).
 
-A seventh, **`playwright`**, is unrelated to the `mcp-servers` package: the role installs a
+A fourth, **`playwright`**, is unrelated to the `mcp-servers` package: the role installs a
 pinned Node.js + Chromium locally and registers `npx @playwright/mcp` through a local
 `mcp-playwright` wrapper script (`ai_agents_mcp_playwright_wrapper`) that resolves the
 downloaded Chromium executable path at launch - local dev server browser rendering, x86_64
