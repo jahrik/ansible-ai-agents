@@ -64,6 +64,6 @@
       ansible.builtin.command:
         cmd: "{{ ai_agents_bin_dir }}/npx --yes playwright install chromium"
       environment:
-        PATH: "{{ ai_agents_bin_dir }}:{{ ansible_env.PATH }}"
+        PATH: "{{ ai_agents_bin_dir }}:{{ ansible_facts['env']['PATH'] }}"
       when: not ai_agents_playwright_cache.stat.exists
       changed_when: true
