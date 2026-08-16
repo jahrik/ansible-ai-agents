@@ -55,20 +55,11 @@ argument_specs:
             command: "{{ ai_agents_mcp_data_bin }}"
             args: []
             env: {}
-          - name: dispatcher
+          - name: playwright
             type: stdio
-            command: "{{ ai_agents_mcp_dispatcher_bin }}"
+            command: "{{ ai_agents_mcp_playwright_wrapper }}"
             args: []
-            env:
-              MCP_DISPATCHER_ALLOW_SPAWN: "1"
-              MCP_DISPATCHER_DB_PATH: "{{ ai_agents_mcp_dispatcher_db_path }}"
-          - name: lsp
-            type: stdio
-            command: "{{ ai_agents_mcp_lsp_bin }}"
-            args: []
-            env:
-              MCP_LSP_COMMAND: "{{ ai_agents_mcp_lsp_command }}"
-              MCP_LSP_ROOT: "{{ ai_agents_mcp_workspace_root }}"
+            env: {}
       ai_agents_mcp_github_allow_write:
         type: bool
         description: >-

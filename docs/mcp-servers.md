@@ -24,20 +24,20 @@ The role installs the package with `uv tool install` (bootstrapping `uv` if need
 vars unset and the bare server is registered anyway - it just can't authenticate until the
 `GITHUB_APP_*` env vars reach it some other way.
 
-The same package provides the other five default servers, none of which need credentials:
+The same package provides the other two default servers, neither of which need credentials:
 
 - **`ws`** (`mcp-workspace`) - read-only local git surveys (dirty trees, unpushed work, stale
   branches) across `ai_agents_mcp_workspace_root` (default `~/github`). It registers as `ws`
   because Claude Code reserves the name `workspace`.
 - **`data`** (`mcp-data`) - SQL over local files (CSV/JSON/JSONL/Parquet) via DuckDB.
-- **`dispatcher`** (`mcp-dispatcher`) - async agent-to-agent job queue (SQLite-backed).
-- **`lsp`** (`mcp-lsp`) - language-server and tree-sitter code navigation.
-- **`memory`** (`mcp-memory`) - persistent, cross-session long-term memory store using DuckDB.
+
+`dispatcher`, `lsp`, and `memory` are archived in the `mcp-servers` package (usage telemetry
+showed zero calls in production) and are no longer registered here.
 
 Each server has a page in the package's
 [`docs/`](https://github.com/jahrik/mcp-servers/tree/main/docs).
 
-A seventh, **`playwright`**, is unrelated to the `mcp-servers` package: the role installs a
+A fourth, **`playwright`**, is unrelated to the `mcp-servers` package: the role installs a
 pinned Node.js + Chromium locally and registers `npx @playwright/mcp` through a local
 `mcp-playwright` wrapper script (`ai_agents_mcp_playwright_wrapper`) that resolves the
 downloaded Chromium executable path at launch - local dev server browser rendering, x86_64
